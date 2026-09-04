@@ -31,13 +31,21 @@ La IA puede interpretar, extraer, clasificar, recomendar y resumir. No decide pr
 
 1. Leer este `AGENTS.md`.
 2. Inspeccionar el código relacionado.
-3. Revisar la documentación correspondiente.
+3. Revisar solo la documentación correspondiente desde `docs/README.md`; no cargar todo `docs/` sin necesidad.
 4. Revisar los tests existentes.
 5. Analizar el impacto multi-tenant.
 6. Analizar seguridad.
 7. Implementar.
 8. Ejecutar tests relevantes.
 9. Revisar el diff.
+
+## Efficient context and diagrams
+
+- Usar este archivo y `docs/README.md` como mapa; abrir únicamente los documentos vinculados a la tarea.
+- La skill local `archify` está disponible en `.agents/skills/archify`.
+- Usar Archify cuando un mapa de arquitectura, workflow, secuencia, data flow o lifecycle reduzca ambigüedad.
+- Guardar la fuente JSON y el HTML validado en `docs/diagrams/`; actualizar el mapa afectado cuando cambie su topología real.
+- Los diagramas resumen el sistema, pero el código y los documentos de arquitectura siguen siendo la fuente de verdad.
 
 ## Documentation map
 
@@ -52,6 +60,7 @@ La IA puede interpretar, extraer, clasificar, recomendar y resumir. No decide pr
 - [Desarrollo de features](docs/workflows/FEATURE_DEVELOPMENT.md)
 - [Code review](docs/workflows/CODE_REVIEW.md)
 - [Checklist de release](docs/workflows/RELEASE_CHECKLIST.md)
+- [Diagramas verificables](docs/diagrams/README.md)
 
 ## Tests
 

@@ -1,0 +1,33 @@
+# Diagramas verificables
+
+Este directorio conserva mapas compactos de CotizaFlow para comprender el sistema sin releer todo el repositorio. Archify está versionado en `.agents/skills/archify` y Claude Code accede a la misma copia desde `.claude/skills/archify`.
+
+## Qué guardar
+
+Cada diagrama debe incluir:
+
+- la fuente tipada `<nombre>.<tipo>.json`;
+- el artefacto validado `<nombre>.html`;
+- hechos respaldados por código o documentación vigente;
+- un alcance acotado y, cuando corresponda, trust boundaries.
+
+Tipos disponibles: `architecture`, `workflow`, `sequence`, `dataflow` y `lifecycle`.
+
+## Uso
+
+Desde la raíz del repositorio:
+
+```bash
+node .agents/skills/archify/bin/archify.mjs validate <tipo> docs/diagrams/<fuente>.json --quality showcase --json
+node .agents/skills/archify/bin/archify.mjs deliver <tipo> docs/diagrams/<fuente>.json docs/diagrams/<salida>.html --quality showcase --json
+```
+
+Seguir siempre las instrucciones de la skill. No crear topología imaginada: inspeccionar primero el código y los documentos relacionados. Cuando cambie una relación, frontera o componente representado, actualizar la fuente y volver a validar el artefacto.
+
+## Convenciones
+
+- Preferir 8–12 componentes principales y una ruta central clara.
+- Mantener nombres reales de módulos, servicios, protocolos y límites.
+- No incluir secretos, credenciales, datos personales ni URLs privadas.
+- Tratar el código y los documentos arquitectónicos como fuente de verdad.
+- Registrar decisiones duraderas en `docs/adr/`, no únicamente en un diagrama.

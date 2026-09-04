@@ -2,6 +2,8 @@
 
 Este directorio es la fuente persistente de contexto de producto, arquitectura y operación del repositorio. Las decisiones arquitectónicas futuras deben registrarse como ADRs.
 
+Para evitar consumo innecesario de contexto, empezar por este índice y abrir solo los documentos relevantes para la tarea. Los diagramas sirven como mapas compactos; no sustituyen las reglas detalladas ni el código.
+
 ## Producto
 
 - [Visión de CotizaFlow](product/COTIZAFLOW_VISION.md)
@@ -25,3 +27,7 @@ Este directorio es la fuente persistente de contexto de producto, arquitectura y
 ## Decisiones
 
 - [Architecture Decision Records](adr/README.md)
+
+## Diagramas
+
+- [Diagramas verificables con Archify](diagrams/README.md)

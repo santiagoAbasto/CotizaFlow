@@ -4,7 +4,7 @@ CotizaFlow es un SaaS B2B multi-tenant orientado a convertir consultas en cotiza
 
 ## Antes de implementar
 
-1. Leer [el índice documental](docs/README.md) y los documentos relacionados con la tarea.
+1. Leer [el índice documental](docs/README.md) y únicamente los documentos relacionados con la tarea.
 2. Inspeccionar el código y los tests existentes.
 3. Presentar `CURRENT STATE`, `GAP`, `RISKS` y `PLAN`; para cambios grandes, incluir `FILES`.
 4. Confirmar el impacto de multi-tenancy, autorización, datos históricos y cálculos financieros.
@@ -19,6 +19,10 @@ CotizaFlow es un SaaS B2B multi-tenant orientado a convertir consultas en cotiza
 - Mantener `AIProviderInterface` y `AIOrchestrator`; la IA interpreta y recomienda, pero nunca es autoridad sobre precio, costo, descuentos, margen, impuestos, stock o totales.
 - Mantener controllers delgados y la lógica de negocio fuera de React.
 - No commitear secretos ni eliminar tests para obtener verde.
+
+## Contexto eficiente y Archify
+
+Usar `CLAUDE.md` y `docs/README.md` como índices en lugar de cargar toda la documentación. Archify está disponible para Claude Code mediante `.claude/skills/archify`, enlazada a la única copia versionada en `.agents/skills/archify`. Usarla cuando un diagrama reduzca la cantidad de contexto necesaria para comprender arquitectura, workflows, secuencias, flujos de datos o estados. Conservar sus fuentes JSON y HTML validados en [`docs/diagrams/`](docs/diagrams/README.md).
 
 ## Validación y reporte
 
