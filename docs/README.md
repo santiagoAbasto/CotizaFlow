@@ -4,6 +4,8 @@ Este directorio es la fuente persistente de contexto de producto, arquitectura y
 
 Para evitar consumo innecesario de contexto, empezar por este índice y abrir solo los documentos relevantes para la tarea. Los diagramas sirven como mapas compactos; no sustituyen las reglas detalladas ni el código.
 
+Cuando exista un grafo generado, usar [Graphify](KNOWLEDGE_GRAPH.md) como primera capa de consulta del codebase y verificar en fuente únicamente los detalles necesarios.
+
 ## Producto
 
 - [Visión de CotizaFlow](product/COTIZAFLOW_VISION.md)
@@ -31,3 +33,7 @@ Para evitar consumo innecesario de contexto, empezar por este índice y abrir so
 ## Diagramas
 
 - [Diagramas verificables con Archify](diagrams/README.md)
+
+## Conocimiento persistente
+
+- [Grafo consultable del codebase con Graphify](KNOWLEDGE_GRAPH.md)

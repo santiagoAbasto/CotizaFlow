@@ -24,6 +24,8 @@ CotizaFlow es un SaaS B2B multi-tenant orientado a convertir consultas en cotiza
 
 Usar `CLAUDE.md` y `docs/README.md` como índices en lugar de cargar toda la documentación. Archify está disponible para Claude Code mediante `.claude/skills/archify`, enlazada a la única copia versionada en `.agents/skills/archify`. Usarla cuando un diagrama reduzca la cantidad de contexto necesaria para comprender arquitectura, workflows, secuencias, flujos de datos o estados. Conservar sus fuentes JSON y HTML validados en [`docs/diagrams/`](docs/diagrams/README.md).
 
+Graphify está disponible mediante `.claude/skills/graphify`, enlazada a `.agents/skills/graphify`. Cuando exista `graphify-out/graph.json`, consultar primero el grafo para preguntas sobre el codebase y cargar archivos fuente solo cuando haga falta verificar o ampliar una respuesta. Usar actualizaciones incrementales después de cambios estructurales; no reconstruir el grafo en cada tarea. Ver [guía del grafo persistente](docs/KNOWLEDGE_GRAPH.md).
+
 ## Validación y reporte
 
 Ejecutar los tests relevantes y revisar el diff antes de finalizar. Reportar `IMPLEMENTED`, `TEST RESULTS`, `SECURITY REVIEW`, `TECHNICAL DEBT`, `RISKS` y `NEXT BEST STEP`. No declarar validación sin haber ejecutado el comando correspondiente.

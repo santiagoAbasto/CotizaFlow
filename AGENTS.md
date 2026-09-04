@@ -42,6 +42,8 @@ La IA puede interpretar, extraer, clasificar, recomendar y resumir. No decide pr
 ## Efficient context and diagrams
 
 - Usar este archivo y `docs/README.md` como mapa; abrir únicamente los documentos vinculados a la tarea.
+- La skill local `graphify` está disponible en `.agents/skills/graphify`. Si existe `graphify-out/graph.json`, consultar primero el grafo para preguntas sobre el codebase y abrir código fuente solo para confirmar o completar la respuesta.
+- Actualizar Graphify de forma incremental después de cambios estructurales relevantes; no reconstruirlo en cada tarea.
 - La skill local `archify` está disponible en `.agents/skills/archify`.
 - Usar Archify cuando un mapa de arquitectura, workflow, secuencia, data flow o lifecycle reduzca ambigüedad.
 - Guardar la fuente JSON y el HTML validado en `docs/diagrams/`; actualizar el mapa afectado cuando cambie su topología real.
@@ -61,6 +63,7 @@ La IA puede interpretar, extraer, clasificar, recomendar y resumir. No decide pr
 - [Code review](docs/workflows/CODE_REVIEW.md)
 - [Checklist de release](docs/workflows/RELEASE_CHECKLIST.md)
 - [Diagramas verificables](docs/diagrams/README.md)
+- [Grafo persistente del codebase](docs/KNOWLEDGE_GRAPH.md)
 
 ## Tests
 
