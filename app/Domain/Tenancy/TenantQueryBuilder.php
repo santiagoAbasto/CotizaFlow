@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Domain\Tenancy;
 
 use App\Domain\Tenancy\Exceptions\TenantColumnImmutable;
+use App\Domain\Tenancy\Exceptions\TenantContextChanged;
 use App\Domain\Tenancy\Exceptions\TenantWriteRejected;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 
@@ -28,6 +30,12 @@ final class TenantQueryBuilder extends Builder
 
     private string $tenantTable;
 
+    private ?int $boundTenantId = null;
+
+    private ?int $tenantWhereIndex = null;
+
+    private ?int $tenantBindingIndex = null;
+
     /** @param class-string $model */
     public function forTenantModel(string $model, string $table): static
     {
@@ -37,16 +45,79 @@ final class TenantQueryBuilder extends Builder
         return $this;
     }
 
+    /** Set and safely scope the root table at builder construction time. */
+    public function from($table, $as = null)
+    {
+        parent::from($table, $as);
+        $this->enforceTenantBoundary();
+
+        return $this;
+    }
+
     /**
-     * Apply the boundary at the last moment before SQL execution. This protects
-     * reads obtained through getQuery(), where Eloquent global scopes have not
-     * yet been applied, as well as every write implemented by the base builder.
+     * Idempotently installs the tenant predicate and binds this builder to the
+     * current tenant. TenantScope delegates here so aliases and base/Eloquent
+     * queries share one source of truth.
      */
+    public function enforceTenantBoundary(): void
+    {
+        $tenantId = $this->tenantId();
+        $column = TenantTableReference::resolve($this->from, $this->table(), $this->model())
+            ->tenantColumn();
+
+        if ($this->boundTenantId !== null && $this->boundTenantId !== $tenantId) {
+            throw TenantContextChanged::forModel($this->model());
+        }
+
+        $this->boundTenantId ??= $tenantId;
+
+        if ($this->tenantWhereIndex === null) {
+            $this->tenantWhereIndex = count($this->wheres);
+            $this->tenantBindingIndex = count($this->bindings['where']);
+            parent::where($column, '=', $tenantId);
+
+            return;
+        }
+
+        $this->assertTenantPredicateIntact();
+        $this->wheres[$this->tenantWhereIndex]['column'] = $column;
+
+        // SQL AND has higher precedence than OR. Keep all caller conditions
+        // inside one group when a top-level disjunction would escape the root
+        // tenant predicate. Grouping changes no binding order or values.
+        foreach ($this->wheres as $where) {
+            if (str_contains($where['boolean'] ?? '', 'or')) {
+                $conditions = $this->wheres;
+                $tenant = array_splice($conditions, $this->tenantWhereIndex, 1)[0];
+                $nested = new Builder($this->connection, $this->grammar, $this->processor);
+                $nested->wheres = $conditions;
+                $this->wheres = [$tenant, ['type' => 'Nested', 'query' => $nested, 'boolean' => 'and']];
+                $this->tenantWhereIndex = 0;
+
+                break;
+            }
+        }
+    }
+
+    /** Verify context stability without mutating SQL or bindings. */
     public function applyBeforeQueryCallbacks(): void
     {
-        $this->scopeWriteToTenant();
-
         parent::applyBeforeQueryCallbacks();
+
+        $this->enforceTenantBoundary();
+
+        foreach ($this->unions ?? [] as $union) {
+            $query = $union['query'] ?? null;
+
+            if ($query instanceof EloquentBuilder) {
+                $query = $query->getQuery();
+            }
+
+            if ($query instanceof self) {
+                $query->enforceTenantBoundary();
+            }
+        }
+
     }
 
     public function insert(array $values): bool
@@ -199,25 +270,26 @@ final class TenantQueryBuilder extends Builder
 
     private function scopeWriteToTenant(?int $tenantId = null): void
     {
-        $this->where($this->qualifiedTenantColumn(), '=', $tenantId ?? $this->tenantId());
+        if ($tenantId !== null && $tenantId !== $this->tenantId()) {
+            throw TenantContextChanged::forModel($this->model());
+        }
+
+        $this->enforceTenantBoundary();
     }
 
-    private function qualifiedTenantColumn(): string
+    private function assertTenantPredicateIntact(): void
     {
-        if (! is_string($this->from) || trim($this->from) === '') {
-            throw TenantWriteRejected::unsupported($this->model(), 'write against an unresolved table');
+        $where = $this->wheres[$this->tenantWhereIndex] ?? null;
+        $binding = $this->bindings['where'][$this->tenantBindingIndex] ?? null;
+
+        if (! is_array($where)
+            || ($where['type'] ?? null) !== 'Basic'
+            || ($where['operator'] ?? null) !== '='
+            || ($where['boolean'] ?? null) !== 'and'
+            || (int) ($where['value'] ?? 0) !== $this->boundTenantId
+            || (int) $binding !== $this->boundTenantId) {
+            throw TenantWriteRejected::unsupported($this->model(), 'query with a removed tenant predicate');
         }
-
-        $segments = preg_split('/\s+(?:as\s+)?/i', trim($this->from));
-        $source = str_replace(['`', '"'], '', (string) ($segments[0] ?? ''));
-
-        if ($source !== $this->table()) {
-            throw TenantWriteRejected::unsupported($this->model(), 'write after replacing the model table');
-        }
-
-        $qualifier = (string) end($segments);
-
-        return $qualifier.'.'.ColumnName::TENANT;
     }
 
     private function tenantId(): int
