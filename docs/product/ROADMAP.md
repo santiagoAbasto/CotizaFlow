@@ -4,6 +4,10 @@ El roadmap es progresivo y debe ajustarse con evidencia de clientes. Una feature
 
 ## Sprint 0 — Demo comercial
 
+**FOUNDATION: APPROVED.** Baseline `39434c7`, hardening `94e9967`, merge `8c51021`; punto de recuperación local anotado `foundation-v1`. Validación integrada: tenancy 128 tests / 296 assertions; suite completa 160 / 355; calidad y build PASS. Los P3 continúan en el [backlog de foundation](../audit/FOUNDATION_BACKLOG.md).
+
+**SPRINT 0: READY** para implementar; funcionalidades todavía pendientes. Alcance, contratos y seis slices verticales en [Sprint 0 — Commercial Demo](../sprints/SPRINT_0_COMMERCIAL_DEMO.md).
+
 - Autenticación.
 - Empresa y usuarios.
 - Clientes.
@@ -11,11 +15,13 @@ El roadmap es progresivo y debe ajustarse con evidencia de clientes. Una feature
 - Listas de precios.
 - Cotización con cálculos determinísticos y snapshots.
 - PDF.
-- Pipeline.
+- Estados de cotización como seguimiento comercial mínimo; sin constructor de pipelines.
 - Seguimiento.
 - Dashboard básico y accionable.
 
 Objetivo: demostrar el flujo principal y conseguir los primeros 3 clientes fundadores.
+
+Prioridad: un vendedor selecciona cliente y productos y genera una cotización profesional en menos de dos minutos. Orden de entrega: cliente → producto y pricing simple → creación de cotización → PDF y estados → seguimiento → dashboard.
 
 ## Sprint 1 — Imports
 
