@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Tenancy\Scopes;
 
-use App\Domain\Tenancy\TenantContext;
+use App\Domain\Tenancy\TenantQueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -19,9 +19,15 @@ final class TenantScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where(
-            $model->qualifyColumn('company_id'),
-            app(TenantContext::class)->id(),
-        );
+        $query = $builder->getQuery();
+
+        if (! $query instanceof TenantQueryBuilder) {
+            throw new \LogicException(sprintf(
+                '%s uses TenantScope without TenantQueryBuilder.',
+                $model::class,
+            ));
+        }
+
+        $query->enforceTenantBoundary();
     }
 }
