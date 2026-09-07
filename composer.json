@@ -6,6 +6,7 @@
     "keywords": ["saas", "multi-tenant", "quoting"],
     "license": "MIT",
     "require": {
+        "brick/math": "^0.18",
         "php": "^8.4",
         "inertiajs/inertia-laravel": "^3.3",
         "laravel/framework": "^13.17",

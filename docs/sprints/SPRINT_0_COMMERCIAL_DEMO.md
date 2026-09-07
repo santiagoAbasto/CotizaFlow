@@ -35,7 +35,7 @@ Todas las entidades comerciales reutilizan la infraestructura tenant-owned aprob
 | --- | --- |
 | Customer | Nombre/razón social, identificación fiscal opcional, email, teléfono, WhatsApp, condición comercial, notas, status. Extender el modelo existente. |
 | Product | SKU, nombre, descripción, categoría simple, unidad, costo base y precio base con moneda explícita, status. SKU único por company. |
-| PriceList | Nombre, moneda, activa/inactiva, ajuste porcentual simple sobre precio base. Sin reglas por proveedor o motor de reglas. |
+| PriceList | Nombre, moneda, activa/inactiva y overrides exactos por Product mediante ProductPrice. Sin reglas por proveedor o motor de reglas. |
 | Quote | Customer, vendedor, número único por company, fecha, expiración, status, currency, notes, terms, subtotal, discount, tax, total y referencia a lista/snapshot de cálculo. |
 | QuoteItem | Product, SKU y descripción snapshot, quantity, unit, precio unitario snapshot, discount y subtotal. Conservar también costo/precio de lista, tasa/impuesto y provenance necesarios para reproducir el cálculo según ADR 0002. |
 | FollowUp | Quote, customer, owner/user, fecha, nota, status y `next_follow_up_at`. Customer debe coincidir con el de la quote. |
@@ -57,7 +57,7 @@ Cada slice incluye persistencia, Action/validación, Policy, UI usable, estados 
 | Slice | Entrega usable | Criterio de salida |
 | --- | --- | --- |
 | 1 — Customer end-to-end — **IMPLEMENTED** | Login/logout y selección explícita de Company; listado paginado, búsqueda, alta, ficha, edición y activación/inactivación de clientes. | Usuario autenticado opera clientes de su empresa; requests manipulados y búsquedas ajenas rechazados. Validado con Pest y Playwright en MySQL. |
-| 2 — Product + simple pricing end-to-end | Catálogo mínimo y gestión de listas desde el contexto de productos/configuración; precio explicable calculado en backend. | Crear producto/lista, resolver precio de la misma moneda y probar cantidades/descuentos/rounding con decimal seguro. |
+| 2 — Product + simple pricing end-to-end — **IMPLEMENTED** | Catálogo mínimo, listas con overrides por producto y precio explicable resuelto en backend. | Product/PriceList/ProductPrice tenant-owned; fallback, provenance, moneda, precisión y aislamiento validados con Pest y Playwright en MySQL. |
 | 3 — Quote creation end-to-end | Flujo principal optimizado: cliente, productos, lista, cantidades, descuento, totales y guardado transaccional. | Quote y líneas coherentes con snapshots; un fallo no deja una cotización parcial. Es la prioridad comercial del sprint. |
 | 4 — PDF + status | PDF consistente y transiciones autorizadas con origen manual trazable. | PDF refleja snapshots y sólo es descargable por usuarios autorizados; se registra enviada sin inventar señales externas. |
 | 5 — Follow-up | Programar, listar hoy/vencidos, registrar nota y completar seguimiento. | Vendedor identifica y atiende oportunidades pendientes sin automatización. |
@@ -99,7 +99,7 @@ Navegación visible: **Dashboard · Clientes · Productos · Cotizaciones · Seg
 Norma: [ADR 0002 — Money and decimal arithmetic](../adr/0002-money-and-decimal-arithmetic.md).
 
 - MySQL `DECIMAL(20,6)` para importes/costos/cantidades, `DECIMAL(9,6)` para porcentajes, moneda ISO `CHAR(3)`. Intercambiar strings decimales; nunca float en cálculos financieros de PHP/JavaScript ni como paso intermedio.
-- 21 % se representa como `21.000000`; conversión a factor centralizada. Usar decimal seguro y precisión intermedia suficiente; elegir y declarar dependencia durante Slice 2 conforme al ADR.
+- 21 % se representa como `21.000000`; conversión a factor centralizada. `brick/math` queda declarado como dependencia decimal directa desde Slice 2; los Value Objects completos se incorporarán cuando el cálculo los requiera.
 - `ROUND_HALF_UP`, según exponente de la moneda: BOB/USD/ARS = 2. Conservar precisión durante cantidad × precio, ajuste y descuento; redondear subtotal comercial por línea. Subtotal de quote = suma de líneas redondeadas.
 - Impuesto por línea sobre subtotal redondeado, redondeado por moneda; impuesto de quote = suma de impuestos de líneas. Total = suma de subtotales netos + impuestos, sin restar otra vez los descuentos resumidos.
 - Tasas/condiciones fiscales explícitas y validadas; no inferir reglas contables por moneda ni afirmar que la cotización sea factura fiscal.
@@ -150,4 +150,6 @@ Por slice, acordar primero contrato de datos, permisos, errores y archivos asign
 
 Slice 1 reutiliza la foundation tenant-owned aprobada, asigna `company_id` exclusivamente desde `TenantContext`, conserva clientes inactivos y ofrece estados de carga, error y vacío. La búsqueda es server-side, parametrizada y mantiene filtros en URL; la interfaz se revisó en 1440, 1366, 1024, 768 y 375 px.
 
-**Next implementation step: SLICE 2 — PRODUCT + SIMPLE PRICING.**
+Slice 2 incorpora Product, PriceList y ProductPrice con constraints tenant-aware, SKU único por empresa, monedas USD/BOB/ARS, unidades acotadas y activación/inactivación. `ResolveProductPrice` devuelve precio, moneda y origen: override de una lista activa y compatible cuando existe; en caso contrario, precio base. No convierte monedas ni aplica cantidades, descuentos o reglas avanzadas.
+
+**Next implementation step: SLICE 3 — QUOTE CREATION END-TO-END.**

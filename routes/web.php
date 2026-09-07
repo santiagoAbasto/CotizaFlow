@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\CompanySelectionController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PriceListController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SessionController;
 use App\Http\Middleware\ResolveTenantContext;
 use Illuminate\Support\Facades\Route;
@@ -17,4 +19,10 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/companies/select', [CompanySelectionController::class, 'store'])->name('tenancy.activate');
     Route::resource('customers', CustomerController::class)->except('destroy');
     Route::patch('/customers/{customer}/status', [CustomerController::class, 'status'])->name('customers.status');
+    Route::resource('products', ProductController::class)->except('destroy');
+    Route::patch('/products/{product}/status', [ProductController::class, 'status'])->name('products.status');
+    Route::resource('price-lists', PriceListController::class)->except('destroy')->parameters(['price-lists' => 'priceList']);
+    Route::patch('/price-lists/{priceList}/status', [PriceListController::class, 'status'])->name('price-lists.status');
+    Route::put('/price-lists/{priceList}/products/{product}', [PriceListController::class, 'setProductPrice'])->name('price-lists.products.update');
+    Route::delete('/price-lists/{priceList}/products/{product}', [PriceListController::class, 'removeProductPrice'])->name('price-lists.products.destroy');
 });

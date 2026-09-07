@@ -44,7 +44,7 @@ Rounding mode único para todo lo anterior: `ROUND_HALF_UP` (justificado más ab
 ### Aritmética en PHP
 
 - **Nunca `float`.** Ni siquiera de forma transitoria: un cast intermedio anula la garantía.
-- Se usa aritmética decimal segura sobre `bcmath` (extensión ya presente) o `brick/math` como `BigDecimal`. La elección concreta de librería se difiere al ADR del Pricing Engine; lo que este ADR fija es la **prohibición de float** y el uso de decimal exacto.
+- Se usa `brick/math` con `BigDecimal`, declarado como dependencia directa desde Sprint 0 Slice 2. La elección evita depender accidentalmente de una dependencia transitiva y mantiene explícita la **prohibición de float**. Los Value Objects financieros completos siguen diferidos hasta que el cálculo de cotizaciones los requiera.
 - Los valores viajan como `string` entre PHP y MySQL, no como `float`, para que el driver no degrade la precisión.
 
 ### Porcentajes — representación única

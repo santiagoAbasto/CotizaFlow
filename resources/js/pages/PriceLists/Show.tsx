@@ -1,0 +1,29 @@
+import { Link, router, useForm } from '@inertiajs/react';
+import { useState, type FormEvent } from 'react';
+import Layout from '../../components/Layout';
+import Status from '../../components/Status';
+import type { CatalogStatus, Currency, PriceList } from '../../types';
+
+type ListedProduct = { id: number; sku: string; name: string; base_price: string; display_base_price: string; override_price: string | null; display_override_price: string | null; status: CatalogStatus; currency: Currency };
+type Props = { priceList: PriceList; products: { data: ListedProduct[]; total: number; current_page: number; last_page: number; prev_page_url: string | null; next_page_url: string | null }; filters: { q: string } };
+
+function ProductPriceRow({ product, priceList, query }: { product: ListedProduct; priceList: PriceList; query: string }) {
+    const form = useForm({ price: product.override_price ?? '', q: query });
+    const editable = product.status === 'active' && priceList.status === 'active';
+    function save(e: FormEvent) { e.preventDefault(); form.put('/price-lists/' + priceList.id + '/products/' + product.id, { preserveScroll: true }); }
+    function remove() { router.delete('/price-lists/' + priceList.id + '/products/' + product.id, { data: { q: query }, preserveScroll: true }); }
+    return <article className="pricing-row"><div><span className="sku">{product.sku}</span><Link href={'/products/' + product.id} className="customer-name">{product.name}</Link></div><span className="money">{product.currency} {product.display_base_price}</span><form onSubmit={save}><label className="sr-only" htmlFor={'price-' + product.id}>Precio de lista para {product.name}</label><div className="price-input"><span>{product.currency}</span><input id={'price-' + product.id} className="input" inputMode="decimal" maxLength={22} disabled={!editable} placeholder={product.display_base_price} value={form.data.price} aria-invalid={Boolean(form.errors.price)} aria-describedby={form.errors.price ? 'price-error-' + product.id : undefined} onChange={e => form.setData('price', e.target.value)} /><button className="button" disabled={!editable || form.processing}>{product.override_price === null ? 'Asignar' : 'Actualizar'}</button></div>{form.errors.price && <p id={'price-error-' + product.id} className="field-error">{form.errors.price}</p>}</form><div className="row-actions"><Status status={product.status} />{product.override_price !== null && <button type="button" className="text-button" onClick={remove}>Usar precio base</button>}</div></article>;
+}
+
+export default function Show({ priceList, products, filters }: Props) {
+    const statusForm = useForm({ status: priceList.status === 'active' ? 'inactive' : 'active' }); const [q, setQ] = useState(filters.q);
+    function search(e: FormEvent) { e.preventDefault(); router.get('/price-lists/' + priceList.id, { q }, { preserveState: true }); }
+    function toggle() { statusForm.transform(() => ({ status: priceList.status === 'active' ? 'inactive' : 'active' })); statusForm.patch('/price-lists/' + priceList.id + '/status', { preserveScroll: true }); }
+    return <Layout title={priceList.name}><Link href="/price-lists" className="back-link">Volver a listas</Link><div className="page-heading"><div><p className="eyebrow">Lista · {priceList.currency}</p><h1>{priceList.name}</h1><Status status={priceList.status} /></div><Link className="button primary" href={'/price-lists/' + priceList.id + '/edit'}>Editar lista</Link></div>
+        {priceList.status === 'inactive' && <p className="notice">Esta lista está inactiva. Sus precios se conservan, pero no podrá usarse en nuevas cotizaciones.</p>}
+        <section className="list-products"><div className="section-heading"><div><h2>Precios por producto</h2><p>Un campo vacío usa el precio base. Solo aparecen productos en {priceList.currency}.</p></div></div><form className="filters" onSubmit={search}><div className="search-field"><label htmlFor="q">Buscar producto</label><input id="q" className="input" type="search" placeholder="SKU, nombre o categoría" value={q} maxLength={100} onChange={e => setQ(e.target.value)} /></div><button className="button">Buscar</button></form>
+            {products.data.length === 0 ? <div className="empty-state compact"><h2>{filters.q ? 'No encontramos productos con esa búsqueda.' : 'No hay productos compatibles con esta lista.'}</h2><p>{filters.q ? 'Prueba otro SKU o nombre.' : 'Crea un producto activo en ' + priceList.currency + ' para asignarle un precio.'}</p>{!filters.q && <Link href="/products/create" className="button primary">Agregar producto</Link>}</div> : <div className="pricing-table"><div className="pricing-head"><span>Producto</span><span>Precio base</span><span>Precio de lista</span><span>Estado</span></div>{products.data.map(product => <ProductPriceRow key={product.id} product={product} priceList={priceList} query={filters.q} />)}</div>}
+            {products.total > 0 && <nav className="pagination" aria-label="Paginación"><p>Página {products.current_page} de {products.last_page} · {products.total} productos</p><div>{products.prev_page_url ? <Link className="button" href={products.prev_page_url}>Anterior</Link> : <button className="button" disabled>Anterior</button>}{products.next_page_url ? <Link className="button" href={products.next_page_url}>Siguiente</Link> : <button className="button" disabled>Siguiente</button>}</div></nav>}
+        </section><section className="status-action"><div><h2>Estado de la lista</h2><p>{priceList.status === 'active' ? 'Desactívala para impedir nuevas selecciones sin perder sus precios.' : 'Actívala para volver a usar sus precios.'}</p></div><button className="button" disabled={statusForm.processing} onClick={toggle}>{statusForm.processing ? 'Actualizando…' : priceList.status === 'active' ? 'Desactivar lista' : 'Activar lista'}</button></section>
+    </Layout>;
+}
