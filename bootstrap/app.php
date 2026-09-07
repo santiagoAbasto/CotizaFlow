@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveTenantContext;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
@@ -27,7 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             ResolveTenantContext::class,
+            HandleInertiaRequests::class,
         ]);
+
+        $middleware->redirectUsersTo('/companies/select');
 
         // Order matters more than group membership here. The tenant boundary
         // must be bound AFTER authentication (it needs the user) but BEFORE

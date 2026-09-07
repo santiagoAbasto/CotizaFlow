@@ -42,4 +42,9 @@ final class CustomerPolicy
 
         return $membership !== null && $membership->role->canManageCompany();
     }
+
+    public function changeStatus(User $user, Customer $customer): bool
+    {
+        return $this->update($user, $customer);
+    }
 }

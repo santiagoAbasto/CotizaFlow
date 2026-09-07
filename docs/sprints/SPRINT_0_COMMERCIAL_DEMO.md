@@ -56,7 +56,7 @@ Cada slice incluye persistencia, Action/validación, Policy, UI usable, estados 
 
 | Slice | Entrega usable | Criterio de salida |
 | --- | --- | --- |
-| 1 — Customer end-to-end | Como prerrequisito, login/logout y selección de Company existentes a nivel de dominio; luego listado, búsqueda, alta, edición e inactivación de clientes. | Usuario autenticado opera clientes de su empresa; requests manipulados y búsquedas ajenas rechazados. |
+| 1 — Customer end-to-end — **IMPLEMENTED** | Login/logout y selección explícita de Company; listado paginado, búsqueda, alta, ficha, edición y activación/inactivación de clientes. | Usuario autenticado opera clientes de su empresa; requests manipulados y búsquedas ajenas rechazados. Validado con Pest y Playwright en MySQL. |
 | 2 — Product + simple pricing end-to-end | Catálogo mínimo y gestión de listas desde el contexto de productos/configuración; precio explicable calculado en backend. | Crear producto/lista, resolver precio de la misma moneda y probar cantidades/descuentos/rounding con decimal seguro. |
 | 3 — Quote creation end-to-end | Flujo principal optimizado: cliente, productos, lista, cantidades, descuento, totales y guardado transaccional. | Quote y líneas coherentes con snapshots; un fallo no deja una cotización parcial. Es la prioridad comercial del sprint. |
 | 4 — PDF + status | PDF consistente y transiciones autorizadas con origen manual trazable. | PDF refleja snapshots y sólo es descargable por usuarios autorizados; se registra enviada sin inventar señales externas. |
@@ -148,4 +148,6 @@ Propuesta de responsabilidades para futuras tareas, sin iniciar desarrollo en es
 
 Por slice, acordar primero contrato de datos, permisos, errores y archivos asignados. Un responsable por archivo durante cada entrega; secuenciar backend y frontend cuando se solapen. Integrar con pruebas y review antes de empezar el siguiente slice. La división no autoriza edición simultánea sobre los mismos archivos.
 
-**Next implementation step: SLICE 1 — CUSTOMER END-TO-END.**
+Slice 1 reutiliza la foundation tenant-owned aprobada, asigna `company_id` exclusivamente desde `TenantContext`, conserva clientes inactivos y ofrece estados de carga, error y vacío. La búsqueda es server-side, parametrizada y mantiene filtros en URL; la interfaz se revisó en 1440, 1366, 1024, 768 y 375 px.
+
+**Next implementation step: SLICE 2 — PRODUCT + SIMPLE PRICING.**
