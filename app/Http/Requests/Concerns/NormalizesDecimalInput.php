@@ -29,4 +29,16 @@ trait NormalizesDecimalInput
             'regex:/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/',
         ]));
     }
+
+    /** @return array<int, string> */
+    protected function positiveDecimalRules(): array
+    {
+        return ['required', 'string', 'regex:/^(?=.*[1-9])(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/'];
+    }
+
+    /** @return array<int, string> */
+    protected function percentageRules(): array
+    {
+        return ['required', 'string', 'regex:/^(?:100(?:\.0{1,6})?|(?:0|[1-9]\d?)(?:\.\d{1,6})?)$/'];
+    }
 }

@@ -58,7 +58,7 @@ Cada slice incluye persistencia, Action/validación, Policy, UI usable, estados 
 | --- | --- | --- |
 | 1 — Customer end-to-end — **IMPLEMENTED** | Login/logout y selección explícita de Company; listado paginado, búsqueda, alta, ficha, edición y activación/inactivación de clientes. | Usuario autenticado opera clientes de su empresa; requests manipulados y búsquedas ajenas rechazados. Validado con Pest y Playwright en MySQL. |
 | 2 — Product + simple pricing end-to-end — **IMPLEMENTED** | Catálogo mínimo, listas con overrides por producto y precio explicable resuelto en backend. | Product/PriceList/ProductPrice tenant-owned; fallback, provenance, moneda, precisión y aislamiento validados con Pest y Playwright en MySQL. |
-| 3 — Quote creation end-to-end | Flujo principal optimizado: cliente, productos, lista, cantidades, descuento, totales y guardado transaccional. | Quote y líneas coherentes con snapshots; un fallo no deja una cotización parcial. Es la prioridad comercial del sprint. |
+| 3 — Quote creation end-to-end — **IMPLEMENTED** | Flujo principal optimizado: cliente, productos, lista, cantidades, descuento, impuesto, preview del servidor y guardado/edición transaccional. | Quote y líneas coherentes con snapshots; numeración tenant-local bloqueada, tampering rechazado y un fallo no deja una cotización parcial. Validado con Pest y Playwright en MySQL. |
 | 4 — PDF + status | PDF consistente y transiciones autorizadas con origen manual trazable. | PDF refleja snapshots y sólo es descargable por usuarios autorizados; se registra enviada sin inventar señales externas. |
 | 5 — Follow-up | Programar, listar hoy/vencidos, registrar nota y completar seguimiento. | Vendedor identifica y atiende oportunidades pendientes sin automatización. |
 | 6 — Dashboard | Métricas filtrables que abren trabajo pendiente. | Datos reconciliados con cotizaciones y seguimientos reales por tenant y moneda. |
@@ -152,4 +152,6 @@ Slice 1 reutiliza la foundation tenant-owned aprobada, asigna `company_id` exclu
 
 Slice 2 incorpora Product, PriceList y ProductPrice con constraints tenant-aware, SKU único por empresa, monedas USD/BOB/ARS, unidades acotadas y activación/inactivación. `ResolveProductPrice` devuelve precio, moneda y origen: override de una lista activa y compatible cuando existe; en caso contrario, precio base. No convierte monedas ni aplica cantidades, descuentos o reglas avanzadas.
 
-**Next implementation step: SLICE 3 — QUOTE CREATION END-TO-END.**
+Slice 3 incorpora Quote y QuoteItem con snapshots de cliente/producto/precio, secuencia `QT-000001` concurrent-safe por empresa, cálculo por línea con `BigDecimal`/`ROUND_HALF_UP`, preview server-driven y creación/edición transaccional de borradores. Cambiar una lista no repricingea líneas existentes: solo productos nuevos o reemplazados usan la selección actual. Customer, Product y PriceList deben estar activos para nuevas selecciones; su desactivación posterior no rompe históricos.
+
+**Next implementation step: SLICE 4 — PDF + QUOTE STATUS.**

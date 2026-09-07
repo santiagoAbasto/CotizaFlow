@@ -20,3 +20,24 @@ export type ProductFields = { sku: string; name: string; description: string; ca
 export type PriceList = { id: number; name: string; currency: Currency; status: CatalogStatus; prices_count?: number; updated_at?: string };
 export type PriceListFields = { name: string; currency: Currency };
 export type ResolvedProductPrice = { price: string; display_price: string; currency: Currency; source: 'base_price' | 'price_list'; price_list_id: number | null; price_list_name: string | null };
+
+export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+export type QuoteItem = {
+    id: number; product_id: number | null; position: number; sku_snapshot: string; name_snapshot: string;
+    description_snapshot: string | null; unit_snapshot: ProductUnit; unit_label: string; currency_snapshot: Currency;
+    base_cost_snapshot: string | null; base_price_snapshot: string; quantity: string; unit_price: string;
+    price_source: 'base_price' | 'price_list'; source_price_list_id: number | null; source_price_list_name_snapshot: string | null;
+    discount_percent: string; discount_amount: string; tax_percent: string; tax_amount: string;
+    line_subtotal: string; line_total: string; display_unit_price: string; display_discount_amount: string;
+    display_tax_amount: string; display_line_subtotal: string; display_line_total: string; display_quantity: string;
+    display_discount_percent: string; display_tax_percent: string;
+};
+export type Quote = {
+    id: number; number: string; customer_id: number; price_list_id: number | null; created_by: number;
+    customer_name_snapshot: string; customer_legal_name_snapshot: string | null; customer_tax_id_snapshot: string | null;
+    customer_email_snapshot: string | null; customer_phone_snapshot: string | null; price_list_name_snapshot: string | null;
+    currency: Currency; issued_at: string; expires_at: string | null; status: QuoteStatus; status_label: string;
+    notes: string | null; terms: string | null; subtotal: string; discount_total: string; tax_total: string; total: string;
+    display_subtotal: string; display_discount_total: string; display_tax_total: string; display_total: string;
+    updated_at: string; creator_name: string | null; items: QuoteItem[];
+};

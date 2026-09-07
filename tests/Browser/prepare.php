@@ -1,10 +1,20 @@
 <?php
 
 declare(strict_types=1);
+use App\Domain\Customers\CustomerStatus;
+use App\Domain\Money\Currency;
+use App\Domain\Pricing\Actions\SetProductPrice;
+use App\Domain\Pricing\PriceListStatus;
+use App\Domain\Products\ProductStatus;
+use App\Domain\Products\ProductUnit;
 use App\Domain\Tenancy\Enums\MembershipRole;
 use App\Domain\Tenancy\Enums\MembershipStatus;
+use App\Domain\Tenancy\TenantContext;
 use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Membership;
+use App\Models\PriceList;
+use App\Models\Product;
 use App\Models\User;
 use App\Testing\EffectiveDatabaseConfig;
 use App\Testing\TestDatabaseGuard;
@@ -34,3 +44,34 @@ foreach (['Empresa de prueba A', 'Empresa de prueba B'] as $name) {
         $membership->save();
     }
 }
+
+$company = Company::where('name', 'Empresa de prueba A')->firstOrFail();
+app(TenantContext::class)->runAs($company, function () use ($user): void {
+    $customer = Customer::firstOrNew(['name' => 'Taller Andino E2E']);
+    $customer->legal_name = 'Taller Andino SRL';
+    $customer->tax_id = 'E2E-100';
+    $customer->status = CustomerStatus::Active;
+    $customer->save();
+
+    $bearing = Product::firstOrNew(['sku' => 'SKF-E2E-6204']);
+    $bearing->name = 'Rulemán SKF 6204 E2E';
+    $bearing->unit = ProductUnit::Piece;
+    $bearing->base_price = '18.400000';
+    $bearing->currency = Currency::USD;
+    $bearing->status = ProductStatus::Active;
+    $bearing->save();
+
+    $motor = Product::firstOrNew(['sku' => 'WEG-E2E-3HP']);
+    $motor->name = 'Motor WEG 3HP E2E';
+    $motor->unit = ProductUnit::Piece;
+    $motor->base_price = '149.000000';
+    $motor->currency = Currency::USD;
+    $motor->status = ProductStatus::Active;
+    $motor->save();
+
+    $list = PriceList::firstOrNew(['name' => 'Mayorista E2E']);
+    $list->currency = Currency::USD;
+    $list->status = PriceListStatus::Active;
+    $list->save();
+    app(SetProductPrice::class)($user, $list, $bearing, '16.800000');
+});

@@ -8,6 +8,7 @@ use App\Domain\Customers\CustomerStatus;
 use App\Domain\Tenancy\Concerns\BelongsToTenant;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,5 +21,11 @@ class Customer extends Model
     protected function casts(): array
     {
         return ['status' => CustomerStatus::class];
+    }
+
+    /** @param Builder<Customer> $query */
+    public function scopeSelectable(Builder $query): void
+    {
+        $query->where('status', CustomerStatus::Active->value);
     }
 }
