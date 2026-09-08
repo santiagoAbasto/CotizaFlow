@@ -6,11 +6,16 @@ async function verifyResponsive(page: Page, screen: string) {
         await expect(page.locator('h1')).toBeVisible();
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
         if (width <= 768) {
-            await expect.poll(() => page.locator('.main-nav .nav-active').evaluate(element => {
-                const item = element.getBoundingClientRect(); const nav = element.parentElement!.getBoundingClientRect();
-                return item.left >= nav.left && item.right <= nav.right;
-            })).toBeTruthy();
-            if (screen === 'quote-show' && !await page.locator('.quote-items-head').isVisible()) {
+            await expect
+                .poll(() =>
+                    page.locator('.main-nav .nav-active').evaluate((element) => {
+                        const item = element.getBoundingClientRect();
+                        const nav = element.parentElement!.getBoundingClientRect();
+                        return item.left >= nav.left && item.right <= nav.right;
+                    }),
+                )
+                .toBeTruthy();
+            if (screen === 'quote-show' && !(await page.locator('.quote-items-head').isVisible())) {
                 await expect(page.locator('.mobile-display-label').first()).toBeVisible();
             }
         }
@@ -21,7 +26,7 @@ async function verifyResponsive(page: Page, screen: string) {
 
 test('seller builds and edits a real quote through the commercial flow', async ({ page }) => {
     const errors: string[] = [];
-    page.on('pageerror', error => errors.push(error.message));
+    page.on('pageerror', (error) => errors.push(error.message));
     await page.goto('/login');
     await page.getByRole('textbox', { name: 'Email', exact: true }).fill('customer-e2e@example.test');
     await page.getByLabel('Contraseña').fill('E2E-only-not-a-real-account!');

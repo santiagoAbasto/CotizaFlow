@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('seller manages a real customer through the browser', async ({ page }) => {
     const errors: string[] = [];
-    page.on('pageerror', error => errors.push(error.message));
+    page.on('pageerror', (error) => errors.push(error.message));
     const name = 'Repuestos del Sur ' + Date.now();
     await page.goto('/login');
     await page.getByRole('textbox', { name: 'Email', exact: true }).fill('customer-e2e@example.test');
@@ -39,7 +39,10 @@ test('seller manages a real customer through the browser', async ({ page }) => {
             if (destination === 'list') await page.getByRole('link', { name: 'Clientes', exact: true }).click();
             await expect(page.locator('h1')).toBeVisible();
             expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-            await page.screenshot({ path: 'test-results/customer-' + destination + '-' + width + '.png', fullPage: true });
+            await page.screenshot({
+                path: 'test-results/customer-' + destination + '-' + width + '.png',
+                fullPage: true,
+            });
         }
         await page.getByLabel('Buscar cliente', { exact: true }).fill(name);
         await page.getByRole('button', { name: 'Buscar', exact: true }).click();

@@ -12,7 +12,7 @@ async function verifyResponsive(page: Page, screen: string) {
 
 test('seller creates a product and resolves a price-list override', async ({ page }) => {
     const errors: string[] = [];
-    page.on('pageerror', error => errors.push(error.message));
+    page.on('pageerror', (error) => errors.push(error.message));
     const suffix = Date.now().toString();
     const productName = 'Rulemán SKF 6204 ' + suffix;
     const editedName = 'Rulemán sellado SKF 6204 ' + suffix;

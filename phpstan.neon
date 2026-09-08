@@ -1,0 +1,9 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+    # Initial enforced gate. Raise only with the Eloquent casts/relations typed;
+    # never hide diagnostics behind a baseline or ignore list.
+    level: 1

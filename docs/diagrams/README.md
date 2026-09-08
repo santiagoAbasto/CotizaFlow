@@ -13,13 +13,17 @@ Cada diagrama debe incluir:
 
 Tipos disponibles: `architecture`, `workflow`, `sequence`, `dataflow` y `lifecycle`.
 
+## Mapas actuales
+
+- [Runtime architecture — fuente](runtime-architecture.architecture.json) · [artefacto HTML](runtime-architecture.html): request autenticado, frontera tenant, dominio comercial, MySQL y capacidad de jobs tenant-aware.
+
 ## Uso
 
 Desde la raíz del repositorio:
 
 ```bash
-node .agents/skills/archify/bin/archify.mjs validate <tipo> docs/diagrams/<fuente>.json --quality showcase --json
-node .agents/skills/archify/bin/archify.mjs deliver <tipo> docs/diagrams/<fuente>.json docs/diagrams/<salida>.html --quality showcase --json
+node .agents/skills/archify/bin/archify.mjs validate <tipo> docs/diagrams/<fuente>.json --quality showcase --repo-root . --json
+node .agents/skills/archify/bin/archify.mjs deliver <tipo> docs/diagrams/<fuente>.json docs/diagrams/<salida>.html --quality showcase --repo-root . --json
 ```
 
 Seguir siempre las instrucciones de la skill. No crear topología imaginada: inspeccionar primero el código y los documentos relacionados. Cuando cambie una relación, frontera o componente representado, actualizar la fuente y volver a validar el artefacto.

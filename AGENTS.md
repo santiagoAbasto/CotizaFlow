@@ -48,6 +48,13 @@ La IA puede interpretar, extraer, clasificar, recomendar y resumir. No decide pr
 - Usar Archify cuando un mapa de arquitectura, workflow, secuencia, data flow o lifecycle reduzca ambigüedad.
 - Guardar la fuente JSON y el HTML validado en `docs/diagrams/`; actualizar el mapa afectado cuando cambie su topología real.
 - Los diagramas resumen el sistema, pero el código y los documentos de arquitectura siguen siendo la fuente de verdad.
+- Archify es obligatorio para cambios de arquitectura, tenancy, auth/autorización, APIs, webhooks, jobs/events, flujo de datos, cache/storage, servicios externos, IA, pagos, infraestructura, límites de confianza o flujos críticos. Inspeccionar primero el código, generar sólo el tipo de diagrama necesario y validarlo antes de entregarlo.
+
+## Security research and quality gates
+
+- Consultar [Security Research](docs/references/SECURITY_RESEARCH.md) al trabajar en identidad, autorización, tenants, uploads, APIs, secretos, pagos, PII, infraestructura, dependencias o IA. Es inteligencia de amenazas, no una dependencia ni sustituto de OWASP, NIST, RFCs o documentación oficial.
+- Antes de finalizar, ejecutar los gates relevantes y reportar resultados: `composer format:check`, `composer analyse`, `php artisan test`, `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` y Playwright relevante. No inventar scripts ni afirmar gates no ejecutados.
+- El código y los tests reales prevalecen sobre diagramas y documentación. Evitar `any`, duplicación, componentes/funciones gigantes, supresiones sin justificación y abstracciones sin una segunda necesidad real.
 
 ## Documentation map
 

@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "CotizaFlow · Arquitectura runtime actual",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/santiagoAbasto/CotizaFlow.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "524ac1e57b4110371d00fd6435c3fd54e3c8af06"
+    },
+    "views": [
+      {
+        "id": "web-request",
+        "label": "Request comercial autenticado",
+        "focus": ["seller", "inertia", "laravel", "auth", "tenant", "domain", "mysql"],
+        "note": "La identidad y la empresa activa se resuelven antes del binding y de la acción de dominio."
+      },
+      {
+        "id": "tenant-bound-work",
+        "label": "Trabajo tenant-bound",
+        "focus": ["domain", "queue", "worker", "tenant", "mysql"],
+        "note": "Los jobs tenant-aware establecen y restauran el contexto al ejecutarse."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "seller",
+      "type": "external",
+      "label": "Vendedor",
+      "sublabel": "Navegador autenticado",
+      "pos": [30, 310],
+      "size": [130, 62],
+      "sources": [{ "path": "resources/js/pages/Auth/Login.tsx", "label": "login UI" }]
+    },
+    {
+      "id": "inertia",
+      "type": "frontend",
+      "label": "React + Inertia",
+      "sublabel": "Pantallas comerciales",
+      "pos": [220, 310],
+      "size": [145, 62],
+      "sources": [{ "path": "resources/js/app.tsx", "label": "Inertia bootstrap" }]
+    },
+    {
+      "id": "laravel",
+      "type": "backend",
+      "label": "Laravel web runtime",
+      "sublabel": "Rutas · controllers · requests",
+      "pos": [410, 310],
+      "size": [155, 62],
+      "sources": [{ "path": "routes/web.php", "label": "web routes" }]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Sesión y autenticación",
+      "sublabel": "Login throttled · CSRF",
+      "pos": [410, 110],
+      "size": [155, 64],
+      "sources": [{ "path": "app/Http/Controllers/SessionController.php", "label": "session flow" }]
+    },
+    {
+      "id": "tenant",
+      "type": "security",
+      "label": "Tenant boundary",
+      "sublabel": "Membership · context · policies",
+      "pos": [620, 110],
+      "size": [160, 64],
+      "sources": [
+        { "path": "app/Http/Middleware/ResolveTenantContext.php", "label": "request context" },
+        { "path": "app/Domain/Tenancy/TenantContext.php", "label": "trusted primitive" }
+      ]
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "Dominio comercial",
+      "sublabel": "Customers · Products · Pricing · Quotes",
+      "pos": [620, 310],
+      "size": [180, 64],
+      "sources": [
+        { "path": "app/Domain/Quotes/Actions/CreateQuote.php", "label": "quote transaction" },
+        { "path": "app/Domain/Pricing/ResolveProductPrice.php", "label": "price resolution" }
+      ]
+    },
+    {
+      "id": "mysql",
+      "type": "database",
+      "label": "MySQL",
+      "sublabel": "Datos comerciales tenant-owned",
+      "pos": [860, 310],
+      "size": [165, 64],
+      "sources": [{ "path": "config/database.php", "label": "database config" }]
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "Laravel queue",
+      "sublabel": "Cuando se despacha trabajo async",
+      "pos": [620, 500],
+      "size": [165, 64],
+      "sources": [{ "path": "config/queue.php", "label": "queue drivers" }]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Tenant-aware worker",
+      "sublabel": "Contexto establecido y restaurado",
+      "pos": [860, 500],
+      "size": [175, 64],
+      "sources": [{ "path": "app/Domain/Tenancy/Jobs/TenantJobMiddleware.php", "label": "job boundary" }]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Frontera autenticada y tenant-scoped",
+      "wraps": ["auth", "tenant"],
+      "pad": 24
+    }
+  ],
+  "connections": [
+    { "id": "seller-to-inertia", "from": "seller", "to": "inertia", "label": "HTTPS", "variant": "emphasis", "labelDy": -24 },
+    { "id": "inertia-to-laravel", "from": "inertia", "to": "laravel", "label": "Inertia requests", "variant": "emphasis", "labelDy": 56 },
+    { "id": "laravel-to-auth", "from": "laravel", "to": "auth", "label": "session auth", "variant": "security", "fromSide": "top", "toSide": "bottom", "labelDx": 54 },
+    { "id": "auth-to-tenant", "from": "auth", "to": "tenant", "label": "active membership", "variant": "security", "labelDy": 54 },
+    { "id": "laravel-to-domain", "from": "laravel", "to": "domain", "label": "validated action", "labelDy": 56 },
+    { "id": "tenant-to-domain", "from": "tenant", "to": "domain", "label": "scope + authorization", "variant": "security", "fromSide": "bottom", "toSide": "top", "labelDx": 78 },
+    { "id": "domain-to-mysql", "from": "domain", "to": "mysql", "label": "tenant-scoped Eloquent", "variant": "emphasis", "labelDy": -24 },
+    { "id": "domain-to-queue", "from": "domain", "to": "queue", "label": "dispatch when async", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDx": -96 },
+    { "id": "queue-to-worker", "from": "queue", "to": "worker", "label": "job payload", "labelDy": 56 },
+    { "id": "worker-to-mysql", "from": "worker", "to": "mysql", "label": "scoped work", "fromSide": "top", "toSide": "bottom", "labelDx": 70 }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Runtime actual",
+      "items": ["React/Inertia entrega las pantallas comerciales.", "Laravel coordina requests y acciones de dominio.", "MySQL conserva entidades comerciales por company."]
+    },
+    {
+      "dot": "rose",
+      "title": "Invariantes",
+      "items": ["La autenticación precede al tenant binding.", "El contexto antecede al route model binding.", "Policies complementan el scope tenant."]
+    },
+    {
+      "dot": "amber",
+      "title": "Alcance honesto",
+      "items": ["Queues son una capacidad configurada por environment.", "No se representan proveedores externos no implementados.", "La UI fija del visor usa inglés; el contenido del mapa está en español."]
+    }
+  ]
+}

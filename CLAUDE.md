@@ -20,11 +20,21 @@ CotizaFlow es un SaaS B2B multi-tenant orientado a convertir consultas en cotiza
 - Mantener controllers delgados y la lógica de negocio fuera de React.
 - No commitear secretos ni eliminar tests para obtener verde.
 
-## Contexto eficiente y Archify
+## Contexto eficiente, arquitectura y seguridad
 
 Usar `CLAUDE.md` y `docs/README.md` como índices en lugar de cargar toda la documentación. Archify está disponible para Claude Code mediante `.claude/skills/archify`, enlazada a la única copia versionada en `.agents/skills/archify`. Usarla cuando un diagrama reduzca la cantidad de contexto necesaria para comprender arquitectura, workflows, secuencias, flujos de datos o estados. Conservar sus fuentes JSON y HTML validados en [`docs/diagrams/`](docs/diagrams/README.md).
 
 Graphify está disponible mediante `.claude/skills/graphify`, enlazada a `.agents/skills/graphify`. Cuando exista `graphify-out/graph.json`, consultar primero el grafo para preguntas sobre el codebase y cargar archivos fuente solo cuando haga falta verificar o ampliar una respuesta. Usar actualizaciones incrementales después de cambios estructurales; no reconstruir el grafo en cada tarea. Ver [guía del grafo persistente](docs/KNOWLEDGE_GRAPH.md).
+
+Archify es obligatorio cuando cambian arquitectura, tenancy, auth/autorización, APIs, webhooks, jobs/events, flujos de datos, cache/storage, servicios externos, IA, pagos, infraestructura, trust boundaries o flujos críticos. Antes de diagramar, inspeccionar el código real; elegir architecture/workflow/sequence/dataflow/lifecycle según el problema; guardar JSON + HTML validados en `docs/diagrams/` y no inventar topología.
+
+Consultar [Security Research](docs/references/SECURITY_RESEARCH.md) para identidad, tenants, uploads, APIs, secretos, pagos, PII, infraestructura, dependencias e IA. Es contexto de amenazas: prevalecen documentación oficial, OWASP, NIST, RFCs y CWE/CVE para controles técnicos.
+
+## Quality gates
+
+Todo cambio debe conservar nombres de dominio explícitos, responsabilidades acotadas, controllers coordinadores, modelos no monolíticos, React sin `any` y sin autoridad financiera, y reutilización antes de duplicar. No introducir interfaces, DTOs o services sin una necesidad concreta.
+
+Antes de finalizar, ejecutar y reportar los gates aplicables: `composer format:check`, `composer analyse`, `php artisan test`, `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` y Playwright relevante. El código y los tests son la fuente de verdad sobre cualquier diagrama o documento.
 
 ## Validación y reporte
 
