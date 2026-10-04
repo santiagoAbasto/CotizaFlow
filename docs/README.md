@@ -38,6 +38,10 @@ Cuando exista un grafo generado, usar [Graphify](KNOWLEDGE_GRAPH.md) como primer
 
 - [Política de research de seguridad](references/SECURITY_RESEARCH.md)
 
+## Validación comercial
+
+- [Activos para los primeros clientes fundadores](commercial/README.md)
+
 ## Conocimiento persistente
 
 - [Grafo consultable del codebase con Graphify](KNOWLEDGE_GRAPH.md)
