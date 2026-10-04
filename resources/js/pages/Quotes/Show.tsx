@@ -2,7 +2,7 @@ import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import Layout from '../../components/Layout';
 import Status from '../../components/Status';
-import type { Quote } from '../../types';
+import type { FollowUp, FollowUpAssignee, Quote } from '../../types';
 
 type Transition = 'send' | 'accept' | 'reject';
 
@@ -24,11 +24,25 @@ const transitionCopy: Record<Transition, { title: string; body: string; action: 
     },
 };
 
-export default function Show({ quote }: { quote: Quote }) {
+export default function Show({
+    quote,
+    followUps,
+    followUpAssignees,
+}: {
+    quote: Quote;
+    followUps: FollowUp[];
+    followUpAssignees: FollowUpAssignee[];
+}) {
     const [confirmation, setConfirmation] = useState<Transition | null>(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [processing, setProcessing] = useState(false);
     const [transitionError, setTransitionError] = useState<string | null>(null);
+    const [scheduling, setScheduling] = useState(false);
+    const [followUpError, setFollowUpError] = useState<string | null>(null);
+    const [followUpOpen, setFollowUpOpen] = useState(false);
+    const [scheduledAt, setScheduledAt] = useState('');
+    const [assignedTo, setAssignedTo] = useState('');
+    const [followUpNote, setFollowUpNote] = useState('');
 
     function submitTransition() {
         if (!confirmation) return;
@@ -50,6 +64,28 @@ export default function Show({ quote }: { quote: Quote }) {
     }
 
     const pdfUrl = `/quotes/${quote.id}/pdf`;
+    const pendingFollowUp = followUps.find((followUp) => followUp.status === 'pending');
+
+    function scheduleFollowUp() {
+        setFollowUpError(null);
+        router.post(
+            `/quotes/${quote.id}/follow-ups`,
+            { scheduled_at: scheduledAt, assigned_to: assignedTo || null, note: followUpNote },
+            {
+                preserveScroll: true,
+                onStart: () => setScheduling(true),
+                onError: (errors) =>
+                    setFollowUpError(
+                        errors.scheduled_at ??
+                            errors.assigned_to ??
+                            errors.status ??
+                            'No se pudo programar el seguimiento.',
+                    ),
+                onSuccess: () => setFollowUpOpen(false),
+                onFinish: () => setScheduling(false),
+            },
+        );
+    }
 
     return (
         <Layout title={quote.number}>
@@ -118,6 +154,60 @@ export default function Show({ quote }: { quote: Quote }) {
                     <p className="preserve-text">{quote.rejection_reason}</p>
                 </section>
             )}
+            <section className="follow-up-panel" aria-labelledby="follow-up-heading">
+                <div>
+                    <p className="eyebrow">Seguimiento</p>
+                    <h2 id="follow-up-heading">Próximo contacto</h2>
+                </div>
+                {pendingFollowUp ? (
+                    <div className="follow-up-next">
+                        <div>
+                            <strong>
+                                {pendingFollowUp.timing_label ?? pendingFollowUp.status_label} ·{' '}
+                                {pendingFollowUp.scheduled_at}
+                            </strong>
+                            <p>
+                                {pendingFollowUp.assignee_name}
+                                {pendingFollowUp.note ? ` · ${pendingFollowUp.note}` : ''}
+                            </p>
+                        </div>
+                        <Link href="/follow-ups" className="text-link">
+                            Ver seguimientos
+                        </Link>
+                    </div>
+                ) : quote.status === 'sent' ? (
+                    <div className="follow-up-next">
+                        <p>Programa el próximo contacto para que esta oportunidad no se pierda.</p>
+                        <button className="button primary" onClick={() => setFollowUpOpen(true)}>
+                            Programar seguimiento
+                        </button>
+                    </div>
+                ) : (
+                    <p className="follow-up-muted">
+                        Los seguimientos realizados aparecerán aquí. Las nuevas acciones comerciales se programan sobre
+                        cotizaciones enviadas.
+                    </p>
+                )}
+                {followUps.length > 0 && (
+                    <ol className="follow-up-history" aria-label="Historial de seguimientos">
+                        {followUps.map((followUp) => (
+                            <li key={followUp.id}>
+                                <strong>{followUp.status_label}</strong>
+                                <span>
+                                    {followUp.scheduled_at} · {followUp.assignee_name}
+                                </span>
+                                {followUp.outcome_label && (
+                                    <p>
+                                        {followUp.outcome_label}
+                                        {followUp.outcome_note ? ` · ${followUp.outcome_note}` : ''}
+                                    </p>
+                                )}
+                                {!followUp.outcome_label && followUp.note && <p>{followUp.note}</p>}
+                            </li>
+                        ))}
+                    </ol>
+                )}
+            </section>
             <section className="quote-document" aria-label="Detalle de la cotización">
                 <div className="quote-items-head">
                     <span>Producto</span>
@@ -235,6 +325,65 @@ export default function Show({ quote }: { quote: Quote }) {
                             </button>
                             <button className="button primary" disabled={processing} onClick={submitTransition}>
                                 {processing ? 'Guardando…' : transitionCopy[confirmation].action}
+                            </button>
+                        </div>
+                    </div>
+                </dialog>
+            )}
+            {followUpOpen && (
+                <dialog open className="confirmation-dialog" aria-labelledby="follow-up-dialog-title">
+                    <div>
+                        <p className="eyebrow">Seguimiento</p>
+                        <h2 id="follow-up-dialog-title">Programar contacto</h2>
+                        <p>La fecha y hora quedan visibles para el responsable en Seguimientos.</p>
+                        <label htmlFor="follow_up_scheduled_at">
+                            Fecha y hora
+                            <input
+                                id="follow_up_scheduled_at"
+                                className="input"
+                                type="datetime-local"
+                                value={scheduledAt}
+                                onChange={(event) => setScheduledAt(event.target.value)}
+                                required
+                            />
+                        </label>
+                        <label htmlFor="follow_up_assigned_to">
+                            Responsable
+                            <select
+                                id="follow_up_assigned_to"
+                                className="input"
+                                value={assignedTo}
+                                onChange={(event) => setAssignedTo(event.target.value)}
+                            >
+                                <option value="">Yo (responsable actual)</option>
+                                {followUpAssignees.map((assignee) => (
+                                    <option value={assignee.id} key={assignee.id}>
+                                        {assignee.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label htmlFor="follow_up_note">
+                            Nota <span className="required">(opcional)</span>
+                            <textarea
+                                id="follow_up_note"
+                                className="input"
+                                value={followUpNote}
+                                maxLength={2000}
+                                onChange={(event) => setFollowUpNote(event.target.value)}
+                            />
+                        </label>
+                        {followUpError && (
+                            <p role="alert" className="field-error">
+                                {followUpError}
+                            </p>
+                        )}
+                        <div className="dialog-actions">
+                            <button className="button" disabled={scheduling} onClick={() => setFollowUpOpen(false)}>
+                                Cancelar
+                            </button>
+                            <button className="button primary" disabled={scheduling} onClick={scheduleFollowUp}>
+                                {scheduling ? 'Programando…' : 'Programar seguimiento'}
                             </button>
                         </div>
                     </div>

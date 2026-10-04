@@ -71,6 +71,37 @@ export type ResolvedProductPrice = {
 };
 
 export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+export type FollowUpStatus = 'pending' | 'completed' | 'cancelled';
+export type FollowUpOutcome = 'contacted' | 'no_answer' | 'customer_reviewing' | 'needs_changes' | 'other';
+export type FollowUpAssignee = { id: number; name: string };
+export type FollowUp = {
+    id: number;
+    quote_id: number;
+    customer_id: number;
+    assigned_to: number;
+    note: string | null;
+    outcome_note: string | null;
+    cancellation_reason: string | null;
+    previous_follow_up_id: number | null;
+    status: FollowUpStatus;
+    status_label: string;
+    outcome: FollowUpOutcome | null;
+    outcome_label: string | null;
+    scheduled_at: string;
+    scheduled_at_input: string;
+    completed_at: string | null;
+    cancelled_at: string | null;
+    timing: 'overdue' | 'today' | 'upcoming' | 'completed' | 'cancelled';
+    timing_label: string | null;
+    quote_number: string;
+    quote_status: QuoteStatus;
+    quote_total: string;
+    quote_currency: Currency;
+    customer_name: string;
+    assignee_name: string;
+    completed_by_name: string | null;
+    cancelled_by_name: string | null;
+};
 export type QuoteItem = {
     id: number;
     product_id: number | null;

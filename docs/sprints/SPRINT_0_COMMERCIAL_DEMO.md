@@ -38,7 +38,7 @@ Todas las entidades comerciales reutilizan la infraestructura tenant-owned aprob
 | PriceList | Nombre, moneda, activa/inactiva y overrides exactos por Product mediante ProductPrice. Sin reglas por proveedor o motor de reglas. |
 | Quote | Customer, vendedor, número único por company, fecha, expiración, status, currency, notes, terms, subtotal, discount, tax, total y referencia a lista/snapshot de cálculo. |
 | QuoteItem | Product, SKU y descripción snapshot, quantity, unit, precio unitario snapshot, discount y subtotal. Conservar también costo/precio de lista, tasa/impuesto y provenance necesarios para reproducir el cálculo según ADR 0002. |
-| FollowUp | Quote, customer, owner/user, fecha, nota, status y `next_follow_up_at`. Customer debe coincidir con el de la quote. |
+| FollowUp | Quote, customer derivado, responsable, fecha, nota, outcome, status y vínculo al seguimiento anterior cuando se programa el próximo. Customer debe coincidir con el de la quote. |
 
 La cotización/PDF conserva los datos comerciales relevantes de empresa y cliente para evitar que cambios posteriores alteren un documento emitido. El vínculo al producto sirve para trazabilidad, no para recalcular históricos.
 
@@ -60,7 +60,7 @@ Cada slice incluye persistencia, Action/validación, Policy, UI usable, estados 
 | 2 — Product + simple pricing end-to-end — **IMPLEMENTED** | Catálogo mínimo, listas con overrides por producto y precio explicable resuelto en backend. | Product/PriceList/ProductPrice tenant-owned; fallback, provenance, moneda, precisión y aislamiento validados con Pest y Playwright en MySQL. |
 | 3 — Quote creation end-to-end — **IMPLEMENTED** | Flujo principal optimizado: cliente, productos, lista, cantidades, descuento, impuesto, preview del servidor y guardado/edición transaccional. | Quote y líneas coherentes con snapshots; numeración tenant-local bloqueada, tampering rechazado y un fallo no deja una cotización parcial. Validado con Pest y Playwright en MySQL. |
 | 4 — PDF + status — **IMPLEMENTED** | PDF A4 consistente, transiciones autorizadas y expiración auditable. | PDF refleja snapshots y sólo es descargable por usuarios autorizados; `draft → sent → accepted/rejected/expired`, timestamps y scheduler diario quedan cubiertos por Pest y Playwright. |
-| 5 — Follow-up | Programar, listar hoy/vencidos, registrar nota y completar seguimiento. | Vendedor identifica y atiende oportunidades pendientes sin automatización. |
+| 5 — Follow-up — **IMPLEMENTED** | Programar desde cotizaciones enviadas, priorizar vencidos/hoy, registrar resultado, reprogramar o cancelar. | Un pending por quote, responsables con membership activa, histórico preservado y cancelación automática al aceptar/rechazar la quote. Validado con Pest y Playwright en MySQL. |
 | 6 — Dashboard | Métricas filtrables que abren trabajo pendiente. | Datos reconciliados con cotizaciones y seguimientos reales por tenant y moneda. |
 
 ## Routes / Screens
@@ -156,4 +156,6 @@ Slice 3 incorpora Quote y QuoteItem con snapshots de cliente/producto/precio, se
 
 Slice 4 incorpora Blade + Dompdf para un PDF A4 privado y autorizado, usando únicamente snapshots de Quote/QuoteItem. El borrador se identifica visualmente y la emisión captura el nombre comercial disponible. Las Actions transaccionales controlan `draft → sent → accepted/rejected/expired`; `sent_at`, `accepted_at`, `rejected_at` y `expired_at` aportan trazabilidad mínima. Una quote emitida no se edita; el comando diario `quotes:expire` procesa cada tenant bajo `TenantContext` y sólo vence propuestas enviadas cuya fecha de vigencia ya pasó.
 
-**Next implementation step: SLICE 5 — FOLLOW-UP.**
+Slice 5 incorpora FollowUp tenant-owned con estados `pending`, `completed` y `cancelled`. Sólo una quote `sent` puede recibir un seguimiento nuevo y la restricción única `pending_quote_id` protege el invariante de un pending incluso ante escrituras concurrentes. Vencido/hoy/próximo se deriva de `scheduled_at`, sin persistir un estado temporal; el listado prioriza vencidos, luego hoy y luego próximos. Completar puede programar transaccionalmente el siguiente contacto y accepted/rejected cancelan el pending existente. El valor pendiente de contacto se agrupa por moneda, sin sumar divisas.
+
+**Next implementation step: SLICE 6 — ACTIONABLE DASHBOARD.**

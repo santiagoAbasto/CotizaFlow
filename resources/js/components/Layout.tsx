@@ -87,6 +87,13 @@ export default function Layout({ title, children }: { title: string; children: R
                     >
                         Cotizaciones
                     </Link>
+                    <Link
+                        href="/follow-ups"
+                        className={url.startsWith('/follow-ups') ? 'nav-active' : ''}
+                        aria-current={url.startsWith('/follow-ups') ? 'page' : undefined}
+                    >
+                        Seguimientos
+                    </Link>
                 </nav>
                 <p>
                     Catálogo y precios,

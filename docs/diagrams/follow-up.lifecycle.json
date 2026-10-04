@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Ciclo de seguimiento comercial",
+    "output": "docs/diagrams/follow-up.lifecycle.html",
+    "viewBox": [1180, 650]
+  },
+  "lanes": [
+    { "id": "main", "label": "Seguimiento comercial" },
+    { "id": "quote-events", "label": "Eventos de cotización" },
+    { "id": "terminal", "label": "Cierre histórico" }
+  ],
+  "states": [
+    { "id": "sent", "type": "start", "label": "Cotización enviada", "sublabel": "elegible para seguimiento", "lane": "main", "col": 0, "step": "01" },
+    { "id": "pending", "type": "active", "label": "Pendiente", "sublabel": "un seguimiento por cotización", "lane": "main", "col": 1, "step": "02" },
+    { "id": "contact", "type": "decision", "label": "Registrar contacto", "sublabel": "resultado y nota", "lane": "main", "col": 2, "step": "03" },
+    { "id": "completed", "type": "success", "label": "Completado", "sublabel": "histórico preservado", "lane": "main", "col": 3, "step": "04" },
+    { "id": "next", "type": "active", "label": "Próximo pendiente", "sublabel": "misma quote y customer", "lane": "main", "col": 4, "step": "05" },
+    { "id": "accepted", "type": "success", "label": "Quote aceptada", "sublabel": "cierra pending", "lane": "quote-events", "col": 0, "tag": "quote" },
+    { "id": "rejected", "type": "failure", "label": "Quote rechazada", "sublabel": "cierra pending", "lane": "quote-events", "col": 2, "tag": "quote" },
+    { "id": "cancelled", "type": "failure", "label": "Cancelado", "sublabel": "histórico preservado", "lane": "terminal", "col": 1, "tag": "terminal" }
+  ],
+  "transitions": [
+    { "from": "sent", "to": "pending", "label": "programar", "labelDy": -28, "variant": "emphasis" },
+    { "from": "pending", "to": "contact", "label": "completar", "labelDy": -28 },
+    { "from": "contact", "to": "completed" },
+    { "from": "contact", "to": "next", "label": "programar próximo", "labelDy": -28, "variant": "emphasis", "route": "top-channel" },
+    { "from": "pending", "to": "accepted", "variant": "security", "route": "drop" },
+    { "from": "pending", "to": "rejected", "variant": "security", "route": "drop" },
+    { "from": "pending", "to": "cancelled", "label": "cancelar", "labelDy": 42, "variant": "security", "route": "bottom-channel" },
+    { "from": "accepted", "to": "cancelled", "label": "cierre automático", "variant": "security", "route": "drop" },
+    { "from": "rejected", "to": "cancelled", "label": "cierre automático", "variant": "security", "route": "drop" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Reglas de dominio",
+      "items": [
+        "Sólo una cotización sent admite un seguimiento pendiente.",
+        "Vencido, hoy y próximo se derivan de scheduled_at; no son estados persistidos.",
+        "Una cotización accepted o rejected cancela el pendiente sin borrar el historial."
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 use App\Http\Controllers\CompanySelectionController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\PriceListController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
@@ -41,4 +42,9 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/quotes/{quote}/accept', [QuoteStatusController::class, 'accept'])->name('quotes.accept');
     Route::post('/quotes/{quote}/reject', [QuoteStatusController::class, 'reject'])->name('quotes.reject');
     Route::resource('quotes', QuoteController::class)->except('destroy');
+    Route::get('/follow-ups', [FollowUpController::class, 'index'])->name('follow-ups.index');
+    Route::post('/quotes/{quote}/follow-ups', [FollowUpController::class, 'store'])->name('quotes.follow-ups.store');
+    Route::put('/follow-ups/{followUp}', [FollowUpController::class, 'update'])->name('follow-ups.update');
+    Route::post('/follow-ups/{followUp}/complete', [FollowUpController::class, 'complete'])->name('follow-ups.complete');
+    Route::post('/follow-ups/{followUp}/cancel', [FollowUpController::class, 'cancel'])->name('follow-ups.cancel');
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\FollowUps\FollowUpPresenter;
 use App\Domain\Pricing\PriceListStatus;
 use App\Domain\Quotes\Actions\CreateQuote;
 use App\Domain\Quotes\Actions\UpdateQuote;
@@ -66,12 +67,16 @@ final class QuoteController extends Controller
         return to_route('quotes.show', $quote)->with('success', 'Cotización guardada como borrador');
     }
 
-    public function show(Quote $quote)
+    public function show(Quote $quote, FollowUpPresenter $followUps)
     {
         Gate::authorize('view', $quote);
-        $quote->load(['items', 'creator']);
+        $quote->load(['items', 'creator', 'followUps.quote', 'followUps.customer', 'followUps.assignee', 'followUps.completedBy', 'followUps.cancelledBy']);
 
-        return Inertia::render('Quotes/Show', ['quote' => $this->detail($quote)]);
+        return Inertia::render('Quotes/Show', [
+            'quote' => $this->detail($quote),
+            'followUps' => $quote->followUps->sortByDesc('scheduled_at')->values()->map($followUps)->all(),
+            'followUpAssignees' => $followUps->assignees(),
+        ]);
     }
 
     public function edit(Quote $quote)

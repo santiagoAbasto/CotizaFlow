@@ -57,4 +57,9 @@ class Quote extends Model
     {
         return $this->hasMany(QuoteItem::class)->orderBy('position');
     }
+
+    public function followUps(): HasMany
+    {
+        return $this->hasMany(FollowUp::class);
+    }
 }
