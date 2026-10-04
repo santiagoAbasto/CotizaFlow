@@ -18,6 +18,7 @@ Tipos disponibles: `architecture`, `workflow`, `sequence`, `dataflow` y `lifecyc
 - [Runtime architecture — fuente](runtime-architecture.architecture.json) · [artefacto HTML](runtime-architecture.html): request autenticado, frontera tenant, dominio comercial, MySQL y capacidad de jobs tenant-aware.
 - [Quote status lifecycle — fuente](quote-status.lifecycle.json) · [artefacto HTML](quote-status-lifecycle.html): emisión manual, estados terminales y expiración diaria de cotizaciones del Sprint 0.
 - [Follow-up lifecycle — fuente](follow-up.lifecycle.json) · [artefacto HTML](follow-up.lifecycle.html): programación, resultado, próximo contacto y cierre automático al aceptar/rechazar una quote.
+- [Dashboard de acción comercial — fuente](dashboard-action-flow.workflow.json) · [artefacto HTML](dashboard-action-flow.html): señales operativas, agrupación monetaria por moneda y navegación desde prioridad a cotización.
 
 ## Uso
 

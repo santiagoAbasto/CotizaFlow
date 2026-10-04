@@ -62,5 +62,10 @@ test('seller schedules, completes, and continues a commercial follow-up', async 
     await page.getByRole('dialog').getByRole('button', { name: 'Marcar como aceptada', exact: true }).click();
     await expect(page.getByRole('status')).toHaveText('Cotización marcada como aceptada');
     await page.getByRole('link', { name: 'Seguimientos', exact: true }).click();
-    await expect(page.getByText('No hay seguimientos para este filtro.')).toBeVisible();
+    await expect(
+        page
+            .getByRole('region', { name: 'Lista de seguimientos' })
+            .locator('.follow-up-row')
+            .filter({ hasText: quoteNumber ?? '' }),
+    ).toHaveCount(0);
 });

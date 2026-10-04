@@ -1,0 +1,53 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Dashboard de acción comercial",
+    "subtitle": "Prioriza oportunidades del tenant activo sin combinar monedas.",
+    "output": "docs/diagrams/dashboard-action-flow.html",
+    "animation": "none",
+    "visual_preset": "editorial",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "seller", "label": "Vendedor" },
+    { "id": "dashboard", "label": "Dashboard" },
+    { "id": "domain", "label": "Dominio comercial" },
+    { "id": "data", "label": "Datos tenant-scoped" }
+  ],
+  "phases": [
+    { "id": "signal", "label": "Señales", "fromCol": 0, "toCol": 1 },
+    { "id": "priority", "label": "Priorización", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "action", "label": "Acción", "fromCol": 4, "toCol": 5 }
+  ],
+  "mainPath": ["open", "metrics", "query", "quotes", "priorities", "quote"],
+  "nodes": [
+    { "id": "open", "lane": "seller", "col": 0, "type": "frontend", "label": "Abrir Dashboard", "sublabel": "empresa activa", "width": 138 },
+    { "id": "metrics", "lane": "dashboard", "col": 1, "type": "frontend", "label": "Métricas accionables", "sublabel": "hoy, vencidos, sin seguimiento", "width": 164 },
+    { "id": "query", "lane": "domain", "col": 2, "type": "backend", "label": "CommercialDashboardQuery", "sublabel": "agrupa por moneda", "width": 174 },
+    { "id": "quotes", "lane": "data", "col": 2, "type": "database", "label": "Quotes + FollowUps", "sublabel": "scope de tenant", "tag": "sin FX", "width": 156 },
+    { "id": "priorities", "lane": "dashboard", "col": 4, "type": "frontend", "label": "Prioridades", "sublabel": "vencido → hoy → sin seguimiento", "width": 174 },
+    { "id": "quote", "lane": "seller", "col": 5, "type": "frontend", "label": "Abrir cotización", "sublabel": "actuar o programar", "width": 145 },
+    { "id": "complete", "lane": "domain", "col": 5, "type": "backend", "label": "Completar seguimiento", "sublabel": "actualiza trabajo pendiente", "width": 164 }
+  ],
+  "edges": [
+    { "from": "open", "to": "metrics", "role": "main", "variant": "emphasis" },
+    { "from": "metrics", "to": "query", "label": "consulta actual", "role": "main" },
+    { "from": "query", "to": "quotes", "label": "COUNT · SUM · GROUP BY", "role": "main" },
+    { "from": "quotes", "to": "priorities", "label": "strings decimales por moneda", "role": "return", "variant": "emphasis" },
+    { "from": "priorities", "to": "quote", "role": "main" },
+    { "from": "quote", "to": "complete", "label": "resultado comercial", "role": "branch" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Contrato de dinero",
+      "items": ["Las sumas usan Quote.total snapshot.", "USD, BOB y ARS se muestran por separado."]
+    },
+    {
+      "dot": "rose",
+      "title": "Contrato de urgencia",
+      "items": ["Vencido, hoy, sin seguimiento y vencida tienen orden fijo.", "La ventana temporal es compartida con Seguimientos."]
+    }
+  ]
+}

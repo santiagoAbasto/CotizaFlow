@@ -25,18 +25,19 @@ type Props = {
         prev_page_url: string | null;
         next_page_url: string | null;
     };
-    filters: { q: string; status: string };
+    filters: { q: string; status: string; follow_up: string };
 };
 
 export default function Index({ quotes, filters }: Props) {
     const [q, setQ] = useState(filters.q);
     const [status, setStatus] = useState(filters.status);
+    const [followUp, setFollowUp] = useState(filters.follow_up);
     const [loading, setLoading] = useState(false);
     function search(e: FormEvent) {
         e.preventDefault();
         router.get(
             '/quotes',
-            { q, status },
+            { q, status, follow_up: followUp },
             { preserveState: true, onStart: () => setLoading(true), onFinish: () => setLoading(false) },
         );
     }
@@ -49,6 +50,18 @@ export default function Index({ quotes, filters }: Props) {
                         Cotizaciones <span className="count">{quotes.total}</span>
                     </h1>
                     <p className="muted">Crea una propuesta clara desde cliente, productos y precios confirmados.</p>
+                </div>
+                <div>
+                    <label htmlFor="follow_up">Seguimiento</label>
+                    <select
+                        id="follow_up"
+                        className="input"
+                        value={followUp}
+                        onChange={(e) => setFollowUp(e.target.value)}
+                    >
+                        <option value="">Todos</option>
+                        <option value="missing">Sin seguimiento programado</option>
+                    </select>
                 </div>
                 <Link href="/quotes/create" className="button primary">
                     Nueva cotización
@@ -81,7 +94,7 @@ export default function Index({ quotes, filters }: Props) {
                 <button className="button" disabled={loading}>
                     {loading ? 'Buscando…' : 'Buscar'}
                 </button>
-                {(filters.q || filters.status) && (
+                {(filters.q || filters.status || filters.follow_up) && (
                     <Link href="/quotes" className="text-button">
                         Limpiar filtros
                     </Link>
@@ -91,16 +104,16 @@ export default function Index({ quotes, filters }: Props) {
                 {quotes.data.length === 0 ? (
                     <div className="empty-state">
                         <h2>
-                            {filters.q || filters.status
+                            {filters.q || filters.status || filters.follow_up
                                 ? 'No encontramos cotizaciones con esos filtros.'
                                 : 'Todavía no tienes cotizaciones.'}
                         </h2>
                         <p>
-                            {filters.q || filters.status
+                            {filters.q || filters.status || filters.follow_up
                                 ? 'Prueba otro número, cliente o estado.'
                                 : 'Crea tu primera cotización y conviértela en una propuesta profesional para tu cliente.'}
                         </p>
-                        {!filters.q && !filters.status && (
+                        {!filters.q && !filters.status && !filters.follow_up && (
                             <Link href="/quotes/create" className="button primary">
                                 Nueva cotización
                             </Link>

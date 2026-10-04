@@ -4,7 +4,7 @@
 
 Crear un demo comercial real de CotizaFlow donde un vendedor B2B pueda seleccionar un cliente, agregar productos y generar una cotización profesional en menos de dos minutos. Debe ayudar a conseguir los primeros tres clientes fundadores.
 
-Estado al 2026-09-06: **FOUNDATION APPROVED · SPRINT 0 READY**. Ready significa listo para implementar, no funcionalidades terminadas. Base: merge `8c51021`, con `39434c7` y `94e9967` preservados; tag local `foundation-v1`.
+Estado al 2026-10-04: **FOUNDATION APPROVED · SPRINT 0 COMPLETE**. Base: merge `8c51021`, con `39434c7` y `94e9967` preservados; tag local `foundation-v1`.
 
 ## Commercial Demo Story
 
@@ -61,7 +61,7 @@ Cada slice incluye persistencia, Action/validación, Policy, UI usable, estados 
 | 3 — Quote creation end-to-end — **IMPLEMENTED** | Flujo principal optimizado: cliente, productos, lista, cantidades, descuento, impuesto, preview del servidor y guardado/edición transaccional. | Quote y líneas coherentes con snapshots; numeración tenant-local bloqueada, tampering rechazado y un fallo no deja una cotización parcial. Validado con Pest y Playwright en MySQL. |
 | 4 — PDF + status — **IMPLEMENTED** | PDF A4 consistente, transiciones autorizadas y expiración auditable. | PDF refleja snapshots y sólo es descargable por usuarios autorizados; `draft → sent → accepted/rejected/expired`, timestamps y scheduler diario quedan cubiertos por Pest y Playwright. |
 | 5 — Follow-up — **IMPLEMENTED** | Programar desde cotizaciones enviadas, priorizar vencidos/hoy, registrar resultado, reprogramar o cancelar. | Un pending por quote, responsables con membership activa, histórico preservado y cancelación automática al aceptar/rechazar la quote. Validado con Pest y Playwright en MySQL. |
-| 6 — Dashboard | Métricas filtrables que abren trabajo pendiente. | Datos reconciliados con cotizaciones y seguimientos reales por tenant y moneda. |
+| 6 — Dashboard — **IMPLEMENTED** | Métricas filtrables que abren trabajo pendiente. | Datos reconciliados con cotizaciones y seguimientos reales por tenant y moneda. |
 
 ## Routes / Screens
 
@@ -92,7 +92,7 @@ Navegación visible: **Dashboard · Clientes · Productos · Cotizaciones · Seg
 - Número de quote único por company asignado de forma segura ante concurrencia. Quote y líneas se guardan en una transacción.
 - PDF incluye empresa, cliente, número, fecha, vigencia, líneas, subtotal, descuento, impuestos, total, términos y observaciones. Una plantilla consistente; contenido escapado y archivos privados.
 - Follow-up manual: pendiente/completado/cancelado; fecha y zona horaria explícitas para clasificar hoy/vencido; responsable con membership activa en la company.
-- Dashboard: abiertas = sent/viewed vigentes; vencidas = emitidas fuera de vigencia sin cierre; aceptadas = accepted. Valor cotizado excluye drafts; valor pendiente corresponde a abiertas. Mostrar filtros/período y sumar importes por moneda, nunca ARS+BOB+USD juntos. Seguimientos de hoy/vencidos incluyen sólo pendientes.
+- Dashboard: abiertas = `sent`; vencidas = `expired`; aceptadas = `accepted`. Valor cotizado excluye drafts; valor pendiente corresponde a abiertas. Mostrar filtros/período y sumar importes por moneda, nunca ARS+BOB+USD juntos. Seguimientos de hoy/vencidos incluyen sólo pendientes.
 
 ## Money Rules
 
@@ -158,4 +158,6 @@ Slice 4 incorpora Blade + Dompdf para un PDF A4 privado y autorizado, usando ún
 
 Slice 5 incorpora FollowUp tenant-owned con estados `pending`, `completed` y `cancelled`. Sólo una quote `sent` puede recibir un seguimiento nuevo y la restricción única `pending_quote_id` protege el invariante de un pending incluso ante escrituras concurrentes. Vencido/hoy/próximo se deriva de `scheduled_at`, sin persistir un estado temporal; el listado prioriza vencidos, luego hoy y luego próximos. Completar puede programar transaccionalmente el siguiente contacto y accepted/rejected cancelan el pending existente. El valor pendiente de contacto se agrupa por moneda, sin sumar divisas.
 
-**Next implementation step: SLICE 6 — ACTIONABLE DASHBOARD.**
+Slice 6 convierte el inicio en un Dashboard comercial accionable. `CommercialDashboardQuery` agrupa `Quote.total` por moneda mediante SQL y nunca convierte ni mezcla divisas. Expone abiertas, aceptadas, vencidas, seguimientos vencidos/hoy y emitidas sin pending; las prioridades son determinísticas: vencido → hoy → sin seguimiento → vencida, con total descendente dentro de cada grupo. La tasa de cierre resuelto es `accepted / (accepted + rejected + expired)` y excluye drafts y propuestas aún abiertas. La misma ventana temporal de FollowUps gobierna la pantalla y sus filtros; métricas y prioridades se validan por tenant, moneda y no doble conteo en Pest y Playwright.
+
+**SPRINT 0 — COMPLETE. Next phase: COMMERCIAL VALIDATION — FIRST 3 FOUNDING CUSTOMERS.**

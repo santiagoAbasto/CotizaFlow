@@ -13,11 +13,14 @@ final class PendingFollowUpValue
     /** @return list<array{currency: string, total: string}> */
     public function dueTodayOrOverdue(): array
     {
-        $tomorrow = now()->startOfDay()->addDay();
+        $timing = FollowUpTiming::current();
 
         return Quote::query()
             ->where('status', QuoteStatus::Sent->value)
-            ->whereHas('followUps', fn ($followUps) => $followUps->pending()->where('scheduled_at', '<', $tomorrow))
+            ->whereHas('followUps', function ($followUps) use ($timing): void {
+                $followUps->pending();
+                $timing->applyDueTodayOrOverdue($followUps);
+            })
             ->select('currency')
             ->selectRaw('SUM(total) as total')
             ->groupBy('currency')

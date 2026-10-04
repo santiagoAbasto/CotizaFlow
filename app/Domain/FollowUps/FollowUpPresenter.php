@@ -8,7 +8,6 @@ use App\Domain\Tenancy\Enums\MembershipStatus;
 use App\Domain\Tenancy\TenantContext;
 use App\Models\FollowUp;
 use App\Models\Membership;
-use Illuminate\Support\Carbon;
 
 /** Keeps the Inertia contracts readable without leaking domain rules into React. */
 final class FollowUpPresenter
@@ -30,7 +29,7 @@ final class FollowUpPresenter
     public function __invoke(FollowUp $followUp): array
     {
         $followUp->loadMissing(['quote', 'customer', 'assignee', 'completedBy', 'cancelledBy']);
-        $timing = $this->timing($followUp);
+        $timing = FollowUpTiming::current()->classify($followUp);
 
         return [
             ...$followUp->only(['id', 'quote_id', 'customer_id', 'assigned_to', 'note', 'outcome_note', 'cancellation_reason', 'previous_follow_up_id']),
@@ -58,20 +57,5 @@ final class FollowUpPresenter
             'completed_by_name' => $followUp->completedBy?->name,
             'cancelled_by_name' => $followUp->cancelledBy?->name,
         ];
-    }
-
-    private function timing(FollowUp $followUp): string
-    {
-        if ($followUp->status !== FollowUpStatus::Pending) {
-            return $followUp->status->value;
-        }
-
-        /** @var Carbon $scheduledAt */
-        $scheduledAt = $followUp->scheduled_at;
-        if ($scheduledAt->lt(today())) {
-            return 'overdue';
-        }
-
-        return $scheduledAt->isToday() ? 'today' : 'upcoming';
     }
 }

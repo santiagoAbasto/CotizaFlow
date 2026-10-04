@@ -75,6 +75,6 @@ class FollowUp extends Model
     /** @param Builder<FollowUp> $query */
     public function scopePending(Builder $query): void
     {
-        $query->where('status', FollowUpStatus::Pending->value);
+        $query->where($query->qualifyColumn('status'), FollowUpStatus::Pending->value);
     }
 }

@@ -6,7 +6,7 @@ El roadmap es progresivo y debe ajustarse con evidencia de clientes. Una feature
 
 **FOUNDATION: APPROVED.** Baseline `39434c7`, hardening `94e9967`, merge `8c51021`; punto de recuperación local anotado `foundation-v1`. Validación integrada: tenancy 128 tests / 296 assertions; suite completa 160 / 355; calidad y build PASS. Los P3 continúan en el [backlog de foundation](../audit/FOUNDATION_BACKLOG.md).
 
-**SPRINT 0: READY** para implementar; funcionalidades todavía pendientes. Alcance, contratos y seis slices verticales en [Sprint 0 — Commercial Demo](../sprints/SPRINT_0_COMMERCIAL_DEMO.md).
+**SPRINT 0: COMPLETE.** Alcance, contratos y seis slices verticales en [Sprint 0 — Commercial Demo](../sprints/SPRINT_0_COMMERCIAL_DEMO.md). El siguiente paso es validación comercial con los primeros 3 clientes fundadores, no sumar módulos sin evidencia de demanda.
 
 - Autenticación.
 - Empresa y usuarios.

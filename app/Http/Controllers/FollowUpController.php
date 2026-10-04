@@ -12,6 +12,7 @@ use App\Domain\FollowUps\Exceptions\FollowUpRuleViolation;
 use App\Domain\FollowUps\FollowUpOutcome;
 use App\Domain\FollowUps\FollowUpPresenter;
 use App\Domain\FollowUps\FollowUpStatus;
+use App\Domain\FollowUps\FollowUpTiming;
 use App\Domain\FollowUps\PendingFollowUpValue;
 use App\Http\Requests\FollowUps\CancelFollowUpRequest;
 use App\Http\Requests\FollowUps\CompleteFollowUpRequest;
@@ -39,8 +40,7 @@ final class FollowUpController extends Controller
         $q = trim($filters['q'] ?? '');
         $status = $filters['status'] ?? 'pending';
         $timing = $filters['timing'] ?? 'all';
-        $today = now()->startOfDay();
-        $tomorrow = $today->copy()->addDay();
+        $timingWindow = FollowUpTiming::current();
 
         $query = FollowUp::query()->with([
             'quote:id,company_id,number,customer_name_snapshot,total,currency,status',
@@ -64,15 +64,11 @@ final class FollowUpController extends Controller
         }
         if ($timing !== 'all') {
             $query->pending();
-            match ($timing) {
-                'overdue' => $query->where('scheduled_at', '<', $today),
-                'today' => $query->whereBetween('scheduled_at', [$today, $tomorrow]),
-                'upcoming' => $query->where('scheduled_at', '>=', $tomorrow),
-            };
+            $timingWindow->apply($query, $timing);
         }
 
         $query->orderByRaw('CASE WHEN status = ? AND scheduled_at < ? THEN 0 WHEN status = ? AND scheduled_at < ? THEN 1 WHEN status = ? THEN 2 ELSE 3 END', [
-            FollowUpStatus::Pending->value, $today, FollowUpStatus::Pending->value, $tomorrow, FollowUpStatus::Pending->value,
+            FollowUpStatus::Pending->value, $timingWindow->startOfToday, FollowUpStatus::Pending->value, $timingWindow->startOfTomorrow, FollowUpStatus::Pending->value,
         ])->orderBy('scheduled_at')->orderByDesc('id');
 
         return Inertia::render('FollowUps/Index', [

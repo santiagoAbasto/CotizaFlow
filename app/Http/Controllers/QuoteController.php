@@ -24,7 +24,11 @@ final class QuoteController extends Controller
     public function index(Request $request)
     {
         Gate::authorize('viewAny', Quote::class);
-        $filters = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'status' => ['nullable', Rule::enum(QuoteStatus::class)]]);
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', Rule::enum(QuoteStatus::class)],
+            'follow_up' => ['nullable', Rule::in(['missing'])],
+        ]);
         $q = trim($filters['q'] ?? '');
         $query = Quote::query();
         if ($q !== '') {
@@ -34,10 +38,14 @@ final class QuoteController extends Controller
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
+        if (($filters['follow_up'] ?? null) === 'missing') {
+            $query->where('status', QuoteStatus::Sent->value)
+                ->whereDoesntHave('followUps', fn ($followUps) => $followUps->pending());
+        }
 
         return Inertia::render('Quotes/Index', [
             'quotes' => $query->latest('issued_at')->latest('id')->paginate(20)->withQueryString()->through(fn (Quote $quote) => $this->summary($quote)),
-            'filters' => ['q' => $q, 'status' => $filters['status'] ?? ''],
+            'filters' => ['q' => $q, 'status' => $filters['status'] ?? '', 'follow_up' => $filters['follow_up'] ?? ''],
         ]);
     }
 

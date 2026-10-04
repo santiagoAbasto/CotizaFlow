@@ -102,6 +102,42 @@ export type FollowUp = {
     completed_by_name: string | null;
     cancelled_by_name: string | null;
 };
+export type DashboardAmount = {
+    currency: Currency;
+    amount: string;
+    display_amount: string;
+};
+export type DashboardSummary = { count: number; amounts: DashboardAmount[] };
+export type DashboardPriority = {
+    kind: 'overdue' | 'today' | 'missing_follow_up' | 'expired';
+    quote_id: number;
+    follow_up_id: number | null;
+    number: string;
+    customer_name: string;
+    currency: Currency;
+    amount: string;
+    display_amount: string;
+    reason: string;
+    scheduled_at: string;
+    assignee_name: string | null;
+    cta_label: string;
+};
+export type CommercialDashboard = {
+    has_activity: boolean;
+    attention: DashboardSummary;
+    metrics: {
+        sent: DashboardSummary;
+        accepted: DashboardSummary;
+        expired: DashboardSummary;
+        overdue_follow_ups: DashboardSummary;
+        today_follow_ups: DashboardSummary;
+        without_follow_up: DashboardSummary;
+    };
+    pipeline: { status: QuoteStatus; label: string; summary: DashboardSummary }[];
+    conversion: { accepted: number; resolved: number; rate: string | null };
+    priorities: DashboardPriority[];
+    today_follow_ups: DashboardPriority[];
+};
 export type QuoteItem = {
     id: number;
     product_id: number | null;
