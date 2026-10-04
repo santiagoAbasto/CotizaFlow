@@ -59,7 +59,7 @@ Cada slice incluye persistencia, Action/validación, Policy, UI usable, estados 
 | 1 — Customer end-to-end — **IMPLEMENTED** | Login/logout y selección explícita de Company; listado paginado, búsqueda, alta, ficha, edición y activación/inactivación de clientes. | Usuario autenticado opera clientes de su empresa; requests manipulados y búsquedas ajenas rechazados. Validado con Pest y Playwright en MySQL. |
 | 2 — Product + simple pricing end-to-end — **IMPLEMENTED** | Catálogo mínimo, listas con overrides por producto y precio explicable resuelto en backend. | Product/PriceList/ProductPrice tenant-owned; fallback, provenance, moneda, precisión y aislamiento validados con Pest y Playwright en MySQL. |
 | 3 — Quote creation end-to-end — **IMPLEMENTED** | Flujo principal optimizado: cliente, productos, lista, cantidades, descuento, impuesto, preview del servidor y guardado/edición transaccional. | Quote y líneas coherentes con snapshots; numeración tenant-local bloqueada, tampering rechazado y un fallo no deja una cotización parcial. Validado con Pest y Playwright en MySQL. |
-| 4 — PDF + status | PDF consistente y transiciones autorizadas con origen manual trazable. | PDF refleja snapshots y sólo es descargable por usuarios autorizados; se registra enviada sin inventar señales externas. |
+| 4 — PDF + status — **IMPLEMENTED** | PDF A4 consistente, transiciones autorizadas y expiración auditable. | PDF refleja snapshots y sólo es descargable por usuarios autorizados; `draft → sent → accepted/rejected/expired`, timestamps y scheduler diario quedan cubiertos por Pest y Playwright. |
 | 5 — Follow-up | Programar, listar hoy/vencidos, registrar nota y completar seguimiento. | Vendedor identifica y atiende oportunidades pendientes sin automatización. |
 | 6 — Dashboard | Métricas filtrables que abren trabajo pendiente. | Datos reconciliados con cotizaciones y seguimientos reales por tenant y moneda. |
 
@@ -86,8 +86,8 @@ Navegación visible: **Dashboard · Clientes · Productos · Cotizaciones · Seg
 - Cantidad positiva, importes no negativos y descuentos entre 0 y 100; validar escala, overflow y autorización en backend. Un ajuste de lista no puede producir un precio negativo.
 - Pricing simple: precio base → ajuste opcional de lista → descuento de línea → importe de línea. Lista/producto/quote deben compartir moneda; rechazar mezclas, sin FX implícito.
 - El descuento de cabecera resume los descuentos de líneas; no se aplica una segunda vez al total. La semántica de subtotal/descuento/impuestos debe ser consistente entre pantalla, persistencia y PDF.
-- Status mínimo: `draft`, `sent`, `viewed`, `accepted`, `rejected`, `expired`. `viewed` queda reservado y no se activa sin señal real.
-- Transiciones de Sprint 0: draft → sent; sent → accepted/rejected; sent vencida → expired con evaluación de vigencia en backend. La expiración se refleja sin requerir automatización; impedir aceptación fuera de vigencia. Registrar actor/fecha/origen de cambios.
+- Status mínimo implementado: `draft`, `sent`, `accepted`, `rejected`, `expired`. `viewed` no existe hasta contar con una señal real.
+- Transiciones de Sprint 0: draft → sent; sent → accepted/rejected; sent vencida → expired con evaluación de vigencia en backend. `quotes:expire` se programa diariamente y es idempotente; impedir emisión/aceptación de una propuesta cuya vigencia ya terminó. Registrar timestamps de emisión y resultado.
 - Accepted/rejected se registran manualmente por un usuario autorizado, sin presentarlo como aceptación digital del cliente. No permitir modificaciones financieras silenciosas de cotizaciones emitidas: conservar original y usar copia/revisión explícita si se necesita recotizar.
 - Número de quote único por company asignado de forma segura ante concurrencia. Quote y líneas se guardan en una transacción.
 - PDF incluye empresa, cliente, número, fecha, vigencia, líneas, subtotal, descuento, impuestos, total, términos y observaciones. Una plantilla consistente; contenido escapado y archivos privados.
@@ -154,4 +154,6 @@ Slice 2 incorpora Product, PriceList y ProductPrice con constraints tenant-aware
 
 Slice 3 incorpora Quote y QuoteItem con snapshots de cliente/producto/precio, secuencia `QT-000001` concurrent-safe por empresa, cálculo por línea con `BigDecimal`/`ROUND_HALF_UP`, preview server-driven y creación/edición transaccional de borradores. Cambiar una lista no repricingea líneas existentes: solo productos nuevos o reemplazados usan la selección actual. Customer, Product y PriceList deben estar activos para nuevas selecciones; su desactivación posterior no rompe históricos.
 
-**Next implementation step: SLICE 4 — PDF + QUOTE STATUS.**
+Slice 4 incorpora Blade + Dompdf para un PDF A4 privado y autorizado, usando únicamente snapshots de Quote/QuoteItem. El borrador se identifica visualmente y la emisión captura el nombre comercial disponible. Las Actions transaccionales controlan `draft → sent → accepted/rejected/expired`; `sent_at`, `accepted_at`, `rejected_at` y `expired_at` aportan trazabilidad mínima. Una quote emitida no se edita; el comando diario `quotes:expire` procesa cada tenant bajo `TenantContext` y sólo vence propuestas enviadas cuya fecha de vigencia ya pasó.
+
+**Next implementation step: SLICE 5 — FOLLOW-UP.**

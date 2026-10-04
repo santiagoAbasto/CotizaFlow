@@ -31,4 +31,19 @@ final class QuotePolicy
     {
         return $this->view($user, $quote) && $quote->status === QuoteStatus::Draft;
     }
+
+    public function send(User $user, Quote $quote): bool
+    {
+        return $this->view($user, $quote) && $quote->status === QuoteStatus::Draft;
+    }
+
+    public function accept(User $user, Quote $quote): bool
+    {
+        return $this->view($user, $quote) && $quote->status === QuoteStatus::Sent;
+    }
+
+    public function reject(User $user, Quote $quote): bool
+    {
+        return $this->view($user, $quote) && $quote->status === QuoteStatus::Sent;
+    }
 }

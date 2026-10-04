@@ -9,6 +9,8 @@ use App\Domain\Pricing\PriceListStatus;
 use App\Domain\Quotes\NextQuoteNumber;
 use App\Domain\Quotes\PrepareQuoteDraft;
 use App\Domain\Quotes\QuoteStatus;
+use App\Domain\Tenancy\TenantContext;
+use App\Models\Company;
 use App\Models\Customer;
 use App\Models\PriceList;
 use App\Models\Quote;
@@ -46,6 +48,7 @@ final class CreateQuote
             $quote->issued_at = $data['issued_at'];
             $quote->expires_at = $data['expires_at'] ?? null;
             $quote->status = QuoteStatus::Draft;
+            $quote->company_name_snapshot = Company::query()->findOrFail(app(TenantContext::class)->id())->name;
             $quote->customer_name_snapshot = $customer->name;
             $quote->customer_legal_name_snapshot = $customer->legal_name;
             $quote->customer_tax_id_snapshot = $customer->tax_id;

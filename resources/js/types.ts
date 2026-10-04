@@ -120,6 +120,11 @@ export type Quote = {
     expires_at: string | null;
     status: QuoteStatus;
     status_label: string;
+    sent_at: string | null;
+    accepted_at: string | null;
+    rejected_at: string | null;
+    expired_at: string | null;
+    rejection_reason: string | null;
     notes: string | null;
     terms: string | null;
     subtotal: string;

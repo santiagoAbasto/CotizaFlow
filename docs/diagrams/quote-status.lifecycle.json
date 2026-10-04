@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Quote Status Lifecycle",
+    "subtitle": "Sprint 0 commercial issue workflow",
+    "output": "docs/diagrams/quote-status-lifecycle.html",
+    "viewBox": [1030, 630],
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      { "id": "issuance", "label": "Issuance", "focus": ["draft", "sent"], "note": "A draft becomes an issued proposal only through the explicit send action." },
+      { "id": "outcomes", "label": "Commercial outcomes", "focus": ["sent", "accepted", "rejected", "expired"], "note": "Only a sent quote can reach a terminal commercial state." }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Commercial lifecycle" },
+    { "id": "terminal", "label": "Terminal outcomes" }
+  ],
+  "states": [
+    { "id": "draft", "type": "start", "label": "Draft", "sublabel": "editable · PDF watermarked", "lane": "main", "col": 0, "step": "01", "tag": "internal" },
+    { "id": "sent", "type": "active", "label": "Sent", "sublabel": "issued snapshot · locked", "lane": "main", "col": 2, "step": "02", "tag": "manual mark" },
+    { "id": "accepted", "type": "success", "label": "Accepted", "sublabel": "manual commercial outcome", "lane": "terminal", "col": 0, "tag": "terminal" },
+    { "id": "rejected", "type": "failure", "label": "Rejected", "sublabel": "optional reason recorded", "lane": "terminal", "col": 1, "tag": "terminal" },
+    { "id": "expired", "type": "failure", "label": "Expired", "sublabel": "daily expiry job", "lane": "terminal", "col": 2, "tag": "scheduled" }
+  ],
+  "transitions": [
+    { "id": "send", "from": "draft", "to": "sent", "variant": "emphasis", "route": "straight" },
+    { "id": "accept", "from": "sent", "to": "accepted", "variant": "emphasis", "route": "straight" },
+    { "id": "reject", "from": "sent", "to": "rejected", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "bottom-channel", "channelY": 405 },
+    { "id": "expire", "from": "sent", "to": "expired", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "bottom-channel", "channelY": 420 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Issue boundary", "items": ["Only draft is editable", "Sending records sent_at and locks the commercial snapshot"] },
+    { "dot": "rose", "title": "Terminal states", "items": ["No transition returns to draft", "The daily command expires only sent quotes whose validity date has passed"] }
+  ]
+}

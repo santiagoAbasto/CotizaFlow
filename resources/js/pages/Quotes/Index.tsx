@@ -10,6 +10,7 @@ type QuoteRow = {
     customer_name_snapshot: string;
     currency: Currency;
     issued_at: string;
+    expires_at: string | null;
     status: QuoteStatus;
     status_label: string;
     display_total: string;
@@ -111,9 +112,9 @@ export default function Index({ quotes, filters }: Props) {
                             <span>Número</span>
                             <span>Cliente</span>
                             <span>Fecha</span>
+                            <span>Vigencia</span>
                             <span>Estado</span>
                             <span>Total</span>
-                            <span>Actualizada</span>
                         </div>
                         {quotes.data.map((quote) => (
                             <article className="quote-row" key={quote.id}>
@@ -122,11 +123,11 @@ export default function Index({ quotes, filters }: Props) {
                                 </Link>
                                 <strong>{quote.customer_name_snapshot}</strong>
                                 <time>{quote.issued_at}</time>
+                                <time>{quote.expires_at ?? 'Sin vencimiento'}</time>
                                 <Status status={quote.status} />
                                 <span className="money strong">
                                     {quote.currency} {quote.display_total}
                                 </span>
-                                <time>{new Date(quote.updated_at).toLocaleDateString('es')}</time>
                             </article>
                         ))}
                     </div>

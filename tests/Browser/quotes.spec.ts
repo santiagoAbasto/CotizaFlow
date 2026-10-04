@@ -62,6 +62,33 @@ test('seller builds and edits a real quote through the commercial flow', async (
     await expect(page.getByRole('status')).toHaveText('Borrador actualizado');
     await expect(page.getByText('USD 535.10', { exact: true }).last()).toBeVisible();
 
+    await expect(page.getByRole('link', { name: 'Ver PDF borrador' })).toBeVisible();
+    const draftPdf = await page.request.get(quoteUrl + '/pdf');
+    expect(draftPdf.status()).toBe(200);
+    expect(draftPdf.headers()['content-type']).toContain('application/pdf');
+    expect(draftPdf.headers()['content-disposition']).toContain('cotizacion-QT-');
+
+    await page.getByRole('button', { name: 'Marcar como enviada', exact: true }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: 'Marcar como enviada', exact: true }).click();
+    await expect(page.getByRole('status')).toHaveText('Cotización marcada como enviada');
+    await expect(page.locator('.quote-title .status')).toHaveText('Enviada');
+    await expect(page.getByRole('link', { name: 'Editar borrador' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Ver PDF' })).toBeVisible();
+
+    const issuedPdf = await page.request.get(quoteUrl + '/pdf?download=1');
+    expect(issuedPdf.status()).toBe(200);
+    expect(issuedPdf.headers()['content-type']).toContain('application/pdf');
+    expect(issuedPdf.headers()['content-disposition']).toContain('attachment; filename=cotizacion-QT-');
+
+    await page.getByRole('button', { name: 'Marcar aceptada', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Marcar como aceptada', exact: true }).click();
+    await expect(page.getByRole('status')).toHaveText('Cotización marcada como aceptada');
+    await expect(page.locator('.quote-title .status')).toHaveText('Aceptada');
+    await verifyResponsive(page, 'quote-status');
+    await page.getByRole('link', { name: 'Volver a cotizaciones' }).click();
+    await verifyResponsive(page, 'quote-list');
+
     await page.getByRole('link', { name: /Cambiar empresa/ }).click();
     await page.getByRole('button', { name: /Empresa de prueba B/ }).click();
     await expect(page.getByRole('link', { name: /Empresa de prueba B/ })).toBeVisible();
