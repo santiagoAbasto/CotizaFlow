@@ -18,17 +18,17 @@
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 📑 Contenido
+## <img src="docs/readme/ic-indice.svg" width="24" height="24" alt=""> Contenido
 
 - [El problema](#-el-problema)
 - [La solución](#-la-solución)
 - [Funcionalidades](#-funcionalidades)
-- [Arquitectura](#%EF%B8%8F-arquitectura)
+- [Arquitectura](#-arquitectura)
 - [Flujos de trabajo](#-flujos-de-trabajo)
-- [Modelo de datos](#%EF%B8%8F-modelo-de-datos)
+- [Modelo de datos](#-modelo-de-datos)
 - [Criterios y decisiones](#-criterios-y-decisiones)
-- [Stack](#%EF%B8%8F-stack)
-- [Estructura del repo](#%EF%B8%8F-estructura-del-repo)
+- [Stack](#-stack)
+- [Estructura del repo](#-estructura-del-repo)
 - [Puesta en marcha](#-puesta-en-marcha)
 - [Pruebas y calidad](#-pruebas-y-calidad)
 - [Documentación](#-documentación)
@@ -38,11 +38,11 @@
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🧩 El problema
+## <img src="docs/readme/ic-problema.svg" width="24" height="24" alt=""> El problema
 
 En un equipo comercial B2B, una cotización sigue un recorrido que se rompe fácil: el cliente consulta, alguien busca el producto y su precio, se arma un PDF o una planilla, se envía, y después nadie vuelve a llamar. Las cotizaciones enviadas que no reciben respuesta son ventas que se pierden sin que nadie lo note. La documentación de producto apunta a ese punto como el problema visible.
 
-## 💡 La solución
+## <img src="docs/readme/ic-solucion.svg" width="24" height="24" alt=""> La solución
 
 CotizaFlow mantiene en un solo lugar los clientes, los productos, las listas de precios, las cotizaciones con su PDF y los seguimientos pendientes, con un dashboard que prioriza qué llamar hoy.
 
@@ -55,7 +55,7 @@ Cada empresa es un tenant aislado: un usuario nunca ve datos de otra empresa, au
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## ✨ Funcionalidades
+## <img src="docs/readme/ic-funcionalidades.svg" width="24" height="24" alt=""> Funcionalidades
 
 <details open>
 <summary><b>Cotizaciones</b></summary>
@@ -92,7 +92,7 @@ Cada empresa es un tenant aislado: un usuario nunca ve datos de otra empresa, au
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🏗️ Arquitectura
+## <img src="docs/readme/ic-arquitectura.svg" width="24" height="24" alt=""> Arquitectura
 
 <p align="center">
   <img src="docs/readme/flujo.svg" alt="Cómo funciona: equipo comercial, empresa activa con aislamiento por tenant, cotización con precios y estados, y seguimiento" width="100%">
@@ -115,7 +115,7 @@ El `company_id` que llega desde el cliente es un dato no confiable. La única ru
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🔄 Flujos de trabajo
+## <img src="docs/readme/ic-flujos.svg" width="24" height="24" alt=""> Flujos de trabajo
 
 ### Ciclo de una cotización
 
@@ -156,7 +156,7 @@ sequenceDiagram
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🗃️ Modelo de datos
+## <img src="docs/readme/ic-datos.svg" width="24" height="24" alt=""> Modelo de datos
 
 ```mermaid
 erDiagram
@@ -190,7 +190,7 @@ Toda entidad comercial lleva `company_id` de forma explícita. Los importes se g
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🧭 Criterios y decisiones
+## <img src="docs/readme/ic-criterios.svg" width="24" height="24" alt=""> Criterios y decisiones
 
 | Decisión | Por qué |
 |---|---|
@@ -204,7 +204,7 @@ Toda entidad comercial lleva `company_id` de forma explícita. Los importes se g
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🛠️ Stack
+## <img src="docs/readme/ic-stack.svg" width="24" height="24" alt=""> Stack
 
 Versiones tomadas de `composer.json` y `package.json`.
 
@@ -221,7 +221,7 @@ Versiones tomadas de `composer.json` y `package.json`.
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🗂️ Estructura del repo
+## <img src="docs/readme/ic-estructura.svg" width="24" height="24" alt=""> Estructura del repo
 
 ```text
 app/
@@ -238,7 +238,7 @@ docs/                       producto, arquitectura, ADR, diagramas, workflows, c
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🚀 Puesta en marcha
+## <img src="docs/readme/ic-arranque.svg" width="24" height="24" alt=""> Puesta en marcha
 
 Requisitos: PHP 8.4 o superior, Composer, Node.js y MySQL.
 
@@ -256,7 +256,7 @@ npm run dev
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🧪 Pruebas y calidad
+## <img src="docs/readme/ic-pruebas.svg" width="24" height="24" alt=""> Pruebas y calidad
 
 ```bash
 npm run typecheck     # tsc --noEmit
@@ -272,7 +272,7 @@ npx playwright test   # pruebas E2E en tests/Browser
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 📚 Documentación
+## <img src="docs/readme/ic-libro.svg" width="24" height="24" alt=""> Documentación
 
 | Documento | Qué encuentras |
 |---|---|
@@ -286,13 +286,13 @@ npx playwright test   # pruebas E2E en tests/Browser
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 🐳 Despliegue
+## <img src="docs/readme/ic-despliegue.svg" width="24" height="24" alt=""> Despliegue
 
 No documentado en el repositorio. No se encontraron Dockerfile, Compose ni workflows de CI en la raíz.
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 📌 Estado y pendientes
+## <img src="docs/readme/ic-estado.svg" width="24" height="24" alt=""> Estado y pendientes
 
 - Último commit: **04-10-2026** (`70d2d7a`, «fix: load vite react refresh preamble»), precedido por documentación de la validación con clientes fundadores.
 - Fase: **validación comercial** con clientes fundadores; la documentación de producto la describe como fase de validación, no de operación en producción.
@@ -300,7 +300,7 @@ No documentado en el repositorio. No se encontraron Dockerfile, Compose ni workf
 
 <img src="docs/readme/divider.svg" alt="" width="100%">
 
-## 📄 Licencia y autoría
+## <img src="docs/readme/ic-licencia.svg" width="24" height="24" alt=""> Licencia y autoría
 
 Desarrollado por el **Ing. Santiago Abasto**.
 
